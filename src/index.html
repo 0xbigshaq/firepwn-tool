@@ -1,0 +1,175 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+
+    <title>firepwn</title>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+	<link href="styles/app.css" rel="stylesheet">
+
+	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-functions.js"></script>
+
+	<script src="js/app.js"></script>
+  </head>
+
+  <body>
+	<main role="main" class="container">
+		<h3 class="mt-5">Firepwn</h1>
+		<p class="lead"><i>Test your firebase app's authentication & authorization.</i></p>
+
+			<!-- INIT FORM START -->
+			<ul class="collapsible" id="init-collapsible">
+		<li>
+		<div class="collapsible-header"><i class="small material-icons">whatshot</i> Initialize </div>
+		<div class="collapsible-body">
+		<form id="init-form">
+				<p>Enter your <a href='https://firebase.google.com/docs/web/setup#config-object' target="_blank"><i>firebaseConfig</i></a> object below:</p>
+
+				<div class="input-field col s3">
+						<input type="text" name="apiKey" id="apiKey" required />
+						<label for="apiKey">apiKey</label>
+				</div>
+				<div class="input-field col s3">
+						<input type="text" name="authDomain" id="authDomain" required />
+						<label for="authDomain">authDomain</label>
+				</div>
+				<div class="input-field col s3">
+						<input type="text" name="databaseURL" id="databaseURL" required />
+						<label for="databaseURL">databaseURL</label>
+				</div>
+				<div class="input-field col s3">
+						<input type="text" name="projectId" id="projectId" required  />
+						<label for="projectId">projectId</label>
+				</div>
+				<br />
+				<button type="submit" name="btn-init" id="btn-init" class="btn yellow darken-2 z-depth-0">Start</button>
+		</form>
+			</div>
+			</div>
+		</li>
+		</ul>
+		<!-- INIT FORM END -->
+	</main>
+<p />
+<!-- UI START -->
+	<div class="container" id="ui" style="display: none;">
+    <div class="row"> 
+		<div class="col s9">
+
+		<ul class="collapsible">
+		<li>
+			<div class="collapsible-header"><i class="small material-icons">explore</i> Firestore DB Explorer</div>
+			<div class="collapsible-body">
+			<form id="firestore-explorer">
+
+					<div class="input-field col s12">
+							<input type="text" name="collection_name" id="collection_name" required />
+							<label for="collection_name">Collection name / Path</label>
+					</div>
+
+				<br /> 
+
+				<div class="input-field col s6">
+						<select name="op" id="op-name">
+						  <option selected value="get">Get</option>
+						  <option value="set">Set</option>
+						  <option value="update">Update</option>
+						  <option value="delete">Delete</option>
+						</select>
+						<label>Action</label>
+				</div>
+
+				<div class="input-field col s6">
+						<input type="text" name="docId"  />
+						<label for="docId">Document ID(optional)</label>
+				</div>
+
+				<div id="op-json" style="display: none" class="input-field"> <textarea name="json-input" class="materialize-textarea" style="font-family: Consolas, 'Courier New', Courier, monospace">
+{
+  someField: "fire",
+  anotherOne: "pwn"
+}</textarea> </div>
+
+				<button type="submit" class="btn yellow darken-2 z-depth-0">Execute</button>
+			</form>
+			</div>
+		</li>
+		
+		<li>
+
+				<div class="collapsible-header"><i class="small material-icons">cloud</i> Cloud Functions</div>
+				<div class="collapsible-body">
+			<form id="invoke-cf-form">
+				Invoke a Cloud Function: 
+				<input type="text" id="cloud-cmd" name="cloud-cmd" placeholder="example: makeAdmin({ email: 'shaq@pwn.com', isAdmin: true })" required />
+
+				<button type="submit" class="btn yellow darken-2 z-depth-0">Invoke</button>
+			</form>
+				</div>
+
+		</li>
+		</ul>
+		</div>
+
+		<div class="col s3">
+			<h6> <i class="tiny material-icons">verified_user</i> Auth Service</h6>
+			<span id="auth-status"> <!-- auth status is rendered here --> </span>
+			<div id="auth-pane">
+			<ul class="collapsible">
+					<li>
+					  <div class="collapsible-header"><i class="material-icons">contacts</i>Login</div>
+					  <div class="collapsible-body">
+						<form id='signin-form'>
+						  Email: 
+							<input type="text" name="email" placeholder="test@test.com" required />
+
+						  Password:
+						  <input type="password" name="password" placeholder="******" required />
+						  <button type="submit"  id="signin-btn" class="btn yellow darken-2 z-depth-0">Login</button>
+					    </form>
+					  </div>
+					</li>
+					<li>
+					  <div class="collapsible-header"><i class="material-icons">create</i>Register</div>
+					  <div class="collapsible-body">
+					<form id='signup-form'>
+							Email: 
+								<input type="text" class="input" name="email" placeholder="test@test.com" required />
+							Password:
+							<input type="password" name="password" placeholder="******" required />
+							<button id="signup-btn" type="submit" class="btn yellow darken-2 z-depth-0">Sign up</button>
+							</form>
+					  </div>
+					</li>
+				  </ul>
+				</div>
+			
+		  </div>
+		
+	  </div>
+			
+	  <p />
+	  <b>Output / log:</b>
+	  <p />
+
+	  <div id='output-log'></div>
+
+<!-- UI END -->
+
+	</div>
+	
+    <footer class="footer">
+      <div class="container">
+       <a href='https://github.com/0xbigshaq'  target='_blank'>https://github.com/0xbigshaq</a>
+      </div>
+    </footer>
+  </body>
+</html>
