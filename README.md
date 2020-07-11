@@ -27,7 +27,7 @@ Some applications use [Firebase Authentication](https://firebase.google.com/prod
 >
 >It means that: even if you don't have credentials for a firebase application, you can always register a new account and then login using your fresh credentials.
 >
->**How to prevent**: If you want to close the registration option but keep the auth service alive, you can implement a custom Cloud Function that runs in a cron job to validate that nobody registered a new account. And more importantly, configure your *Firebase Security Rules* correctly.
+>**How to prevent**: If you want to close the registration option but keep the auth service alive, you can implement a custom Cloud Function that runs as a cron job to validate that nobody registered a new account. And more importantly, configure your *Firebase Security Rules* correctly.
 
 ## Firestore DB Features
 firepwn supports all of the useful Firestore DB methods:
