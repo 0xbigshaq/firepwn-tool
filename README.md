@@ -15,11 +15,11 @@ This is why I created *firepwn*: a tool for testing authentication **and** autho
 
 Some applications use [Firebase Authentication](https://firebase.google.com/products/auth) to manage its users (a very common design). If the app that you're testing has this feature enabled: You'll be able to Login to your account and perform queries/cloud invocations as an authenticated user.
 
-Login:
+\> **Login:**
 
 ![login_screenshot](./screenshots/auth_loggedIn.png)
 
-Creating a new account:
+\> **Creating a new account:**
 
 ![signup_screenshot](./screenshots/auth_createAcc.png)
 
@@ -60,7 +60,7 @@ List of the variables:
 | ``window.firestoreService`` | https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore |   |
 | ``window.functionsService`` | https://firebase.google.com/docs/reference/js/firebase.functions.Functions |   |
 
-Sample 1 - Firestore service
+Sample 1: Firestore service
 
 ![programmatic_dump](./screenshots/programmaticDump.gif)
 
