@@ -9,7 +9,7 @@ However:
 
 After digging in Google's documentation for a while, I managed to realize how Firebase applications work internally and the real possibilities to exploit misconfigured *Firebase Security Rules*.
 
-This is why I created *firepwn*: a tool for testing authentication **and** authorization by utilizing multiple Google services(Firebase Auth, Firestore and Cloud Functions) and the Client SDK. 
+This is why I created *firepwn*: a tool for testing authentication **and** authorization by utilizing multiple Google services(Firebase Auth, Firestore and Cloud Functions) using the Client SDK. 
 
 ## Auth Features
 

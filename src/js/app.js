@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(docId) {
                         firestoreService.collection(collection_name).doc(docId).set(jsonInput).then( () => {
                             console.log(`Document was overwritten/created (ID: ${docId})`);
-                            output(`<b>Document overwritten/created (ID: ${docId})</b> <br /><b>Result: </b> ${JSON.stringify(jsonInput)}`);
+                            output(`<b>Document overwritten/created (ID: ${docId})</b> <br /><b>Result: </b> ${escapeHtml(JSON.stringify(jsonInput))}`);
                         }).catch(e => {
                             output(`<b>Error:</b> ${e.message}`);
                         });
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(docId) {
                         firestoreService.collection(collection_name).doc(docId).update(jsonInput).then( () => {
                             console.log(`Updated(Doc ID: ${docId})`);
-                            output(`<b>Updated fields(Doc ID: ${docId})</b><br /> ${JSON.stringify(jsonInput)}`);
+                            output(`<b>Updated fields(Doc ID: ${docId})</b><br /> ${escapeHtml(JSON.stringify(jsonInput))}`);
                         }).catch(e => {
                             output(`<b>Error:</b> ${e.message}`);
                         });
@@ -223,24 +223,29 @@ document.addEventListener('DOMContentLoaded', function() {
             if(op == 'get') {
             try {
                 if(docId) {
+                    // get a specific document
                     firestoreService.collection(collection_name).doc(docId).get().then(snapshot => {
                         data = snapshot.data();
                         if(!data) {
                             throw { message: `Document ${docId} not found` }; 
                         } 
                         console.log("firestore response: ", data);
-                        output(`<b>Getting <i>${docId}</i> from <i>${collection_name}</i> </b> <br /> <b>Response</b>: <br /> ${JSON.stringify(data)}`);
+                        output(`<b>Getting <i>${docId}</i> from <i>${collection_name}</i> </b> <br /> <b>Response</b>: <br /> ${escapeHtml(JSON.stringify(data))}`);
                     }).catch(e => {
                         output(`Error: ${e.message}`);
                     });
                 } else {
+                    // get all documents inside a specific collection
                     firestoreService.collection(collection_name).get().then(snapshots => {
                         let result = '<b>Response</b>: <br />';
                         console.log("firestore response: ");
+                        if(!snapshots.docs.length) {
+                            throw { message: `empty response` }
+                        }
                         snapshots.docs.forEach( doc => {
                             data = doc.data();
                             console.log(data);
-                            result += JSON.stringify(data) + "<br />";
+                            result += escapeHtml(JSON.stringify(data)) + "<br />";
                          });
                          output(result);
                      }).catch(e => {
@@ -305,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             eval(`cloudCallback${funcParams}.then(response => {
                 result += "<b>Response: </b> <br />";
-                result += JSON.stringify(response);
+                result += escapeHtml(JSON.stringify(response));
                 output(result);
             }).catch(e => {
                 console.log(e);
@@ -332,3 +337,12 @@ function output(data) {
     let time = new Date().toLocaleTimeString();
     outputLog.innerHTML = `<pre><i>${time}</i> <br /> ${data} <hr /> ${outputLog.innerHTML}</pre>`;
 }
+
+function escapeHtml(data) { // making the output less messy in case the firestore db contains entries with html tags in it
+    return data           
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
