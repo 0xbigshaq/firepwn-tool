@@ -149,6 +149,19 @@
 							</form>
 					  </div>
 					</li>
+					<li>
+					  <div class="collapsible-header"><i class="material-icons">account_circle</i>Google OAuth</div>
+					  <div class="collapsible-body">
+					  <form id='google-oauth-form'>
+						<p>Paste an OAuth ID token captured from your app's Google sign-in flow.</p>
+						<div class="input-field">
+						  <textarea id="oauthIdToken" name="oauthIdToken" class="materialize-textarea" placeholder="eyJhbGciOiJSUzI1NiIsImtpZCI6Ij..." required></textarea>
+						  <label for="oauthIdToken">OAuth ID token</label>
+						</div>
+						<button type="submit" id="google-oauth-btn" class="btn yellow darken-2 z-depth-0">Authenticate</button>
+					  </form>
+					  </div>
+					</li>
 				  </ul>
 				</div>
 			
