@@ -153,6 +153,39 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
+    googleOAuthForm = document.querySelector('#google-oauth-form')
+    if(googleOAuthForm) {
+        googleOAuthForm.addEventListener('submit', e => {
+            e.preventDefault();
+
+            let idTokenField = googleOAuthForm['oauthIdToken'];
+            let idToken = idTokenField.value.trim();
+
+            if(!idToken) {
+                M.toast({html: 'Please provide an OAuth ID token.'});
+                return;
+            }
+
+            try {
+                let credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+                authService.signInWithCredential(credential).then(creds => {
+                    let email = creds.user.email ? escapeHtml(creds.user.email) : 'no email provided';
+                    output(`Logged in via Google OAuth (${email})`);
+                    idTokenField.value = '';
+                    M.textareaAutoResize(idTokenField);
+                }).catch(e => {
+                    M.toast( {html: e.message} );
+                    output(`<b>Error:</b> Google OAuth sign-in failed. For more info, open the browser's console.`);
+                    console.log(e);
+                });
+            } catch (e) {
+                M.toast( {html: e.message} );
+                console.log(e);
+            }
+        });
+    }
+
+
     // firestore service
 
     exploreForm = document.querySelector('#firestore-explorer');
