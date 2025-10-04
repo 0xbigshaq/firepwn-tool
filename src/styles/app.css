@@ -561,7 +561,6 @@ textarea::placeholder {
 
 #oauthIdToken {
   resize: vertical;
-  overflow: auto;
   white-space: pre-wrap;
   min-height: 140px;
 }
