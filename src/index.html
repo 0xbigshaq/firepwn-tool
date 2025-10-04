@@ -10,7 +10,7 @@
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231b1b1b'/%3E%3Ctext x='16' y='22' font-family='Roboto,Arial,sans-serif' font-size='16' font-weight='700' text-anchor='middle' fill='%23ffffff'%3EFP%3C/text%3E%3C/svg%3E">
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23fdd835'/%3E%3Ctext x='16' y='22' font-family='Roboto,Arial,sans-serif' font-size='16' font-weight='700' text-anchor='middle' fill='%231b1b1b'%3EFP%3C/text%3E%3C/svg%3E">
 	<link href="styles/app.css" rel="stylesheet">
 
 	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
@@ -41,7 +41,7 @@
           class="github-mark"
 		  href="https://github.com/0xbigshaq/firepwn-tool"
           target="_blank"
-          rel="noopener"
+          rel="noopener noreferrer"
           aria-label="Firepwn Tool on GitHub"
         >
           <svg
@@ -59,7 +59,7 @@
           </svg>
         </a>
         <div class="page-credit">
-          <a href="https://github.com/0xbigshaq/firepwn-tool" target="_blank" rel="noopener">firepwn</a>
+          <a href="https://github.com/0xbigshaq/firepwn-tool" target="_blank" rel="noopener noreferrer">firepwn</a>
         </div>
         <button
           id="theme-toggle"
@@ -81,7 +81,7 @@
 		<div class="collapsible-header"><i class="small material-icons">whatshot</i> Initialize </div>
 		<div class="collapsible-body">
 		<form id="init-form">
-				<p>Enter your <a href='https://firebase.google.com/docs/web/setup#config-object' target="_blank"><i>firebaseConfig</i></a> object below:</p>
+				<p>Enter your <a href='https://firebase.google.com/docs/web/setup#config-object' target="_blank" rel="noopener noreferrer"><i>firebaseConfig</i></a> object below:</p>
 
 				<div class="input-field col s3">
 						<input type="text" name="apiKey" id="apiKey" required />
@@ -122,7 +122,7 @@
 
 					<div class="input-field col s12">
 							<input type="text" name="collection_name" id="collection_name" required />
-							<label for="collection_name">Collection name / Path</label>
+							<label for="collection_name">Collection</label>
 					</div>
 
 				<br /> 
@@ -139,7 +139,7 @@
 
 				<div class="input-field col s6">
 						<input type="text" name="docId"  />
-						<label for="docId">Document ID(optional)</label>
+						<label for="docId">Document ID (optional)</label>
 				</div>
 
 				<div id="op-json" style="display: none" class="input-field col s12"> <textarea name="json-input" class="materialize-textarea" style="font-family: Consolas, 'Courier New', Courier, monospace">
@@ -159,7 +159,7 @@
 				<div class="collapsible-body">
 			<form id="invoke-cf-form">
 				Invoke a Cloud Function: 
-				<input type="text" id="cloud-cmd" name="cloud-cmd" placeholder="example: makeAdmin({ email: 'shaq@pwn.com', isAdmin: true })" required />
+				<input type="text" id="cloud-cmd" name="cloud-cmd" placeholder="ex: makeAdmin({ email: 'shaq@pwn.com', isAdmin: true })" required />
 
 				<button type="submit" class="btn yellow darken-2 z-depth-0">Invoke</button>
 			</form>
@@ -220,10 +220,22 @@
 	  </div>
 			
 	  <p />
-	  <b>Output / log:</b>
-	  <p />
+	  <div class="log-toolbar">
+	    <span class="log-title">Output / log</span>
+	    <div class="log-controls">
+	      <button
+	        type="button"
+	        id="log-clear"
+	        class="btn-flat log-clear-btn"
+	        aria-label="Clear log entries"
+	      >
+	        <i class="material-icons" aria-hidden="true">delete_outline</i>
+	        <span class="log-clear-text">Clear</span>
+	      </button>
+	    </div>
+	  </div>
 
-	  <div id='output-log' class="log-output"></div>
+	  <div id='output-log' class="log-output" role="log" aria-live="polite"></div>
 
 <!-- UI END -->
 

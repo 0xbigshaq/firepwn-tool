@@ -83,6 +83,35 @@ main.container {
   color: #616161;
 }
 
+.log-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.log-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  color: #616161;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.log-clear-btn .material-icons {
+  font-size: 18px;
+}
+
+.log-clear-btn:hover,
+.log-clear-btn:focus {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.log-clear-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .icon-button {
   min-width: auto;
   padding: 0 6px;
@@ -430,6 +459,20 @@ body.theme-dark .icon-button:focus {
   background: rgba(255, 255, 255, 0.12);
 }
 
+body.theme-dark .log-clear-btn {
+  color: #f5f5f5;
+}
+
+body.theme-dark .log-clear-btn:hover,
+body.theme-dark .log-clear-btn:focus {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+body.theme-dark .log-clear-btn:disabled {
+  color: rgba(245, 245, 245, 0.55);
+  background: transparent;
+}
+
 .log-output pre {
   margin: 0 0 12px;
   white-space: pre-wrap;
@@ -516,8 +559,10 @@ textarea::placeholder {
   min-height: 140px;
 }
 
-#oauthIdToken.materialize-textarea {
+#oauthIdToken {
   resize: vertical;
+  overflow: auto;
+  white-space: pre-wrap;
   min-height: 140px;
 }
 

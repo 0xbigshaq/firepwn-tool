@@ -7,6 +7,7 @@ window.app = null;
 outputLog = null;
 
 let nextAuthLogMessage = null;
+let logClearButton = null;
 
 const THEME_STORAGE_KEY = "firepwn-theme";
 const THEME_DARK = "dark";
@@ -132,6 +133,11 @@ function setupThemeToggle() {
 
 document.addEventListener("DOMContentLoaded", function () {
   outputLog = document.getElementById("output-log");
+  logClearButton = document.getElementById("log-clear");
+  if (logClearButton) {
+    logClearButton.addEventListener("click", clearLog);
+    logClearButton.disabled = !outputLog || outputLog.children.length === 0;
+  }
   // materialize stuff
   const collapsibleElems = document.querySelectorAll(".collapsible");
   M.Collapsible.init(collapsibleElems);
@@ -166,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const input_btnInit = initForm["btn-init"];
 
     // create a firebaseConfig
-    let firebaseConfig = {
+    const firebaseConfig = {
       apiKey: input_apiKey.value,
       authDomain: input_authDomain.value,
       databaseURL: input_databaseURL.value,
@@ -188,11 +194,16 @@ document.addEventListener("DOMContentLoaded", function () {
     functionsService = firebase.functions();
 
     // update DOM
-    input_apiKey.disabled = true;
-    input_authDomain.disabled = true;
-    input_databaseURL.disabled = true;
-    input_projectId.disabled = true;
-    input_btnInit.disabled = true;
+    const initInputs = [
+      input_apiKey,
+      input_authDomain,
+      input_databaseURL,
+      input_projectId,
+      input_btnInit,
+    ];
+    initInputs.forEach((field) => {
+      field.disabled = true;
+    });
     input_btnInit.textContent = "Initialized";
     input_btnInit.classList.remove("yellow", "darken-2");
     input_btnInit.classList.add("green", "darken-2");
@@ -642,6 +653,18 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+function clearLog() {
+  if (!outputLog) {
+    return;
+  }
+
+  outputLog.innerHTML = "";
+  showToast("Log cleared");
+  if (logClearButton) {
+    logClearButton.disabled = true;
+  }
+}
+
 function fallbackCopyToClipboard(text) {
   const tempInput = document.createElement("textarea");
   tempInput.value = text;
@@ -685,6 +708,10 @@ function output(data) {
 
   outputLog.insertBefore(separator, outputLog.firstChild);
   outputLog.insertBefore(entry, separator);
+
+  if (logClearButton) {
+    logClearButton.disabled = false;
+  }
 }
 
 function escapeHtml(data) {
