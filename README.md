@@ -17,10 +17,12 @@ Some applications use [Firebase Authentication](https://firebase.google.com/prod
 ### Login
 
 ![login_screenshot](./screenshots/auth_loggedIn.png)
+<!-- TODO: Replace with an updated logged in screenshot -->
 
 ### Registration
 
 ![signup_screenshot](./screenshots/auth_createAcc.png)
+<!-- TODO: Replace with an updated account creation screenshot -->
 
 ### OAuth Login
 
@@ -39,7 +41,7 @@ Some applications use [Firebase Authentication](https://firebase.google.com/prod
 *firepwn* supports all of the useful Firestore DB methods:
 
 * Get
-* Set (=create, or overwrite if already exists)
+* Set (create, or overwrite if already exists)
 * Delete
 * Update
 
@@ -81,7 +83,7 @@ If the application's backend uses [*Google Cloud Functions*](https://firebase.go
 
 ![invoke_screenshot](./screenshots/invoke.png)
 
-## Notes
+### Notes
 
 Couple of notes:
 
