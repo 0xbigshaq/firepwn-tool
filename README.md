@@ -10,6 +10,17 @@ After digging in Google's documentation for a while, I managed to realize how Fi
 
 This is why I created *firepwn*: a tool for testing authentication **and** authorization by utilizing multiple Google services(Firebase Auth, Firestore and Cloud Functions) using the Client SDK.
 
+## Usage
+
+1. Launch the tool and populate the initialization form with the target project's `firebaseConfig` values (`apiKey`, `authDomain`, `databaseURL`, `projectId`).
+2. Click **Start** to bootstrap the Firebase SDKs. The rest of the UI unlocks once initialization succeeds.
+3. Use the **Auth Service** panel to authenticate:
+   * Paste captured credentials or register a throwaway email/password account for classic testing.
+   * Paste an `oauthIdToken` captured from your application's Google sign-in flow into the new Google OAuth form to assume an existing Google session.
+4. Run Firestore queries or Cloud Function invocations from the respective panels to verify authorization controls.
+
+![init_screenshot](./screenshots/init.png)
+
 ## Auth Features
 
 Some applications use [Firebase Authentication](https://firebase.google.com/products/auth) to manage its users (a very common design). If the app that you're testing has this feature enabled, you'll be able to login to your account and perform queries/cloud invocations as an authenticated user.
