@@ -51,7 +51,7 @@ Some applications use [Firebase Authentication](https://firebase.google.com/prod
 
 *firepwn* supports all of the useful Firestore DB methods:
 
-* Get
+* Get (with limit, sort order, and filters)
 * Set (create, or overwrite if already exists)
 * Delete
 * Update
@@ -76,9 +76,10 @@ List of the variables:
 
 | variable                    | Available methods/properties                                                 |   |
 |-----------------------------|------------------------------------------------------------------------------|---|
-| `window.authService`        | <https://firebase.google.com/docs/reference/js/firebase.auth.Auth>           |   |
-| `window.firestoreService`   | <https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore> |   |
-| `window.functionsService`   | <https://firebase.google.com/docs/reference/js/firebase.functions.Functions> |   |
+| `window.authService`        | <https://firebase.google.com/docs/reference/js/v8/firebase.auth.Auth>           |   |
+| `window.firestoreService`   | <https://firebase.google.com/docs/reference/js/v8/firebase.firestore.Firestore> |   |
+| `window.functionsService`   | <https://firebase.google.com/docs/reference/js/v8/firebase.functions.Functions> |   |
+| `window.storageService`     | <https://firebase.google.com/docs/reference/js/v8/firebase.storage.Storage>     |   |
 
 ### Example 1: Firestore service
 
@@ -87,6 +88,12 @@ List of the variables:
 ### Example 2: Auth service
 
 ![console_gif](./screenshots/consoleGif.gif)
+
+## Firebase Storage
+
+If you see any references to `gs://` or `bucketDomain` anywhere the app may use Firebase Storage. By including the storage bucket you can also try to perform list, download, upload, delete operations on Firebase Storage.
+
+![firebase_strage](./screenshots/firebasestorage.png)
 
 ## Cloud Functions Feature
 
@@ -98,7 +105,7 @@ If the application's backend uses [*Google Cloud Functions*](https://firebase.go
 
 Couple of notes:
 
-* In order to test the Cloud Functions feature you'll have to either:
+* In order to test the Cloud Functions and Firebase Storage feature you'll have to either:
   * Enable CORS in your firebase app
   * Alternatively, launch your Chrome with a `--disable-web-security` flag to override CORS errors
 * Sorry for my poor front-end syntax/DOM manipulations...I'm more of a backend dude :P

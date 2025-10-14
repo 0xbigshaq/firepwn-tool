@@ -17,6 +17,7 @@
 	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-functions.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-storage.js"></script>
 
 	<script src="js/app.js"></script>
   </head>
@@ -99,6 +100,10 @@
 						<input type="text" name="projectId" id="projectId" required  />
 						<label for="projectId">projectId</label>
 				</div>
+				<div class="input-field col s3">
+						<input type="text" name="storageBucket" id="storageBucket" placeholder="gs://your-bucket-name.appspot.com" />
+						<label for="storageBucket">storageBucket (optional)</label>
+				</div>
 				<br />
 				<button type="submit" name="btn-init" id="btn-init" class="btn yellow darken-2 z-depth-0">Start</button>
 		</form>
@@ -122,34 +127,148 @@
 
 					<div class="input-field col s12">
 							<input type="text" name="collection_name" id="collection_name" required />
-							<label for="collection_name">Collection</label>
+							<label for="collection_name">Collection name / Path</label>
 					</div>
 
 				<br /> 
 
-				<div class="input-field col s6">
-						<select name="op" id="op-name">
-						  <option selected value="get">Get</option>
-						  <option value="set">Set</option>
-						  <option value="update">Update</option>
-						  <option value="delete">Delete</option>
-						</select>
-						<label>Action</label>
+				<div class="row">
+					<div class="input-field col s6">
+							<select name="op" id="op-name">
+							  <option selected value="get">Get</option>
+							  <option value="set">Set</option>
+							  <option value="update">Update</option>
+							  <option value="delete">Delete</option>
+							</select>
+							<label>Action</label>
+					</div>
+
+					<div class="input-field col s6">
+							<input type="text" name="docId"  />
+							<label for="docId">Document ID(optional)</label>
+					</div>
 				</div>
 
-				<div class="input-field col s6">
-						<input type="text" name="docId"  />
-						<label for="docId">Document ID (optional)</label>
+				<div class="row">
+					<div class="input-field col s6">
+							<input type="number" name="limit" value="100" min="1" max="10000" />
+							<label for="limit">Limit (max documents to retrieve)</label>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="input-field col s6">
+						<input type="text" name="sort_field" id="sort_field" placeholder="timestamp, name, createdAt, etc." />
+						<label for="sort_field">Sort by Field (optional)</label>
+						<span class="helper-text">Field to sort by. Requires indexing for complex queries.</span>
+					</div>
+					<div class="input-field col s6">
+						<select name="sort_direction" id="sort_direction">
+							<option value="asc" selected>Ascending (asc)</option>
+							<option value="desc">Descending (desc)</option>
+						</select>
+						<label>Sort Direction</label>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col s12">
+						<h6><i class="tiny material-icons">filter_list</i> Filters (optional)</h6>
+						<p class="grey-text text-darken-1">Add where() conditions to filter documents</p>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="input-field col s4">
+						<input type="text" name="filter_field" id="filter_field" placeholder="status, createdAt, etc." />
+						<label for="filter_field">Filter Field</label>
+						<span class="helper-text">Field path to filter on</span>
+					</div>
+					<div class="input-field col s4">
+						<select name="filter_op" id="filter_op">
+							<option value="" selected>No Filter</option>
+							<option value="==">Equal (==)</option>
+							<option value="!=">Not Equal (!=)</option>
+							<option value="<">Less Than (<)</option>
+							<option value="<=">Less Than or Equal (<=)</option>
+							<option value=">">Greater Than (>)</option>
+							<option value=">=">Greater Than or Equal (>=)</option>
+							<option value="array-contains">Array Contains</option>
+							<option value="array-contains-any">Array Contains Any</option>
+							<option value="in">In Array</option>
+							<option value="not-in">Not In Array</option>
+						</select>
+						<label>Filter Operator</label>
+					</div>
+					<div class="input-field col s4">
+						<input type="text" name="filter_value" id="filter_value" placeholder="active, 2023-01-01" />
+						<label for="filter_value">Filter Value</label>
+						<span class="helper-text">Value to compare against (use JSON for arrays/objects)</span>
+					</div>
 				</div>
 
 				<div id="op-json" style="display: none" class="input-field col s12"> <textarea name="json-input" class="materialize-textarea" style="font-family: Consolas, 'Courier New', Courier, monospace">
 {
   someField: "fire",
   anotherOne: "pwn"
-}</textarea> </div>
+}</textarea> 
+					<div id="merge-option" style="display: none; margin-top: 10px;">
+						<label>
+							<input type="checkbox" name="merge_enabled" id="merge_enabled" />
+							<span>Merge with existing document (instead of overwriting)</span>
+						</label>
+						<p class="grey-text text-darken-1" style="font-size: 12px; margin-top: 5px;">
+							When enabled, only updates specified fields. When disabled, replaces entire document.
+						</p>
+					</div>
+				</div>
 
 				<button type="submit" class="btn yellow darken-2 z-depth-0">Execute</button>
 			</form>
+			</div>
+		</li>
+		
+		<li>
+			<div class="collapsible-header"><i class="small material-icons">cloud_upload</i> Firebase Storage</div>
+			<div class="collapsible-body">
+				<form id="storage-explorer">
+					<div class="input-field col s12">
+						<input type="text" name="storage_path" id="storage_path" placeholder="path/to/file.txt" />
+						<label for="storage_path">File Path (e.g., folder/file.txt)</label>
+					</div>
+
+					<div class="row">
+						<div class="input-field col s6">
+							<select name="storage_op" id="storage-op-name">
+								<option selected value="list">List Files</option>
+								<option value="upload">Upload File</option>
+								<option value="download">Download File</option>
+								<option value="delete">Delete File</option>
+								<option value="get_metadata">Get Metadata</option>
+							</select>
+							<label>Action</label>
+						</div>
+
+						<div class="input-field col s6">
+							<input type="number" name="storage_limit" value="100" min="1" max="1000" />
+							<label for="storage_limit">List Limit (max files to retrieve)</label>
+						</div>
+					</div>
+
+					<div id="storage-upload" style="display: none" class="input-field col s12">
+						<div class="file-field input-field">
+							<div class="btn yellow darken-2">
+								<span>Choose File</span>
+								<input type="file" name="file_upload" id="file_upload" />
+							</div>
+							<div class="file-path-wrapper">
+								<input class="file-path validate" type="text" placeholder="Select a file to upload" />
+							</div>
+						</div>
+					</div>
+
+					<button type="submit" class="btn yellow darken-2 z-depth-0">Execute</button>
+				</form>
 			</div>
 		</li>
 		
@@ -159,7 +278,7 @@
 				<div class="collapsible-body">
 			<form id="invoke-cf-form">
 				Invoke a Cloud Function: 
-				<input type="text" id="cloud-cmd" name="cloud-cmd" placeholder="ex: makeAdmin({ email: 'shaq@pwn.com', isAdmin: true })" required />
+				<input type="text" id="cloud-cmd" name="cloud-cmd" placeholder="example: makeAdmin({ email: 'shaq@pwn.com', isAdmin: true })" required />
 
 				<button type="submit" class="btn yellow darken-2 z-depth-0">Invoke</button>
 			</form>
@@ -213,6 +332,20 @@
 					  </div>
 					</li>
 				  </ul>
+				</div>
+
+				<!-- MFA Section -->
+				<div id="mfa-section" style="display: none;">
+					<h6><i class="tiny material-icons">security</i> Multi-Factor Authentication</h6>
+					<p id="mfa-factor-info">Enter your 6-digit verification code:</p>
+					<div class="input-field">
+						<input type="text" id="mfa-code" maxlength="6" pattern="[0-9]{6}" placeholder="123456" />
+						<label for="mfa-code">Verification Code</label>
+					</div>
+					<button onclick="verifyMfaCode()" class="btn green darken-1 z-depth-0">Verify</button>
+					<button onclick="cancelMfa()" class="btn red darken-1 z-depth-0">Cancel</button>
+					<p><small>Check your SMS for the verification code.</small></p>
+					<div id="mfa-recaptcha"></div>
 				</div>
 			
 		  </div>
