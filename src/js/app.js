@@ -852,8 +852,10 @@ document.addEventListener("DOMContentLoaded", function () {
             
             uploadTask.on('state_changed', 
               (snapshot) => {
-                let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                output(`<b>Upload progress:</b> ${progress.toFixed(1)}%`);
+                if (snapshot.totalBytes > 0) {
+                  let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                  output(`<b>Upload progress:</b> ${progress.toFixed(1)}%`);
+                }
               }, 
               (error) => {
                 output(`<b>Upload error:</b> ${error.message}`);
