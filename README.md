@@ -93,7 +93,7 @@ List of the variables:
 
 If you see any references to `gs://` or `bucketDomain` anywhere the app may use Firebase Storage. By including the storage bucket you can also try to perform list, download, upload, delete operations on Firebase Storage.
 
-![firebase_strage](./screenshots/firebasestorage.png)
+![firebase_storage](./screenshots/firebasestorage.png)
 
 ## Cloud Functions Feature
 
