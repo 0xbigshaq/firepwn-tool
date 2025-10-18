@@ -657,7 +657,7 @@ document.addEventListener("DOMContentLoaded", function () {
               query.get()
                 .then((snapshots) => {
                   const safeCollection = escapeHtml(collection_name);
-                  let filterInfo = filterField ? ` (filtered by ${filterField} ${filterOp} ${filterValue})` : '';
+                  let filterInfo = filterField ? ` (filtered by ${filterField} ${filterOp} ${escapeHtml(filterValue)})` : '';
                   let sortInfo = sortField ? ` (sorted by ${sortField} ${sortDirection})` : '';
                   let limitInfo = limit ? ` (limit: ${limit})` : ' (no limit)';
                   let result = `<b>Getting documents from <i>${safeCollection}</i>${limitInfo}${filterInfo}${sortInfo}</b> <br />`;
