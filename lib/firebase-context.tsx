@@ -528,17 +528,6 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       const funcName = cmd.split("(")[0]
       const funcParams = cmd.split(funcName)[1]
 
-      const validateFunc = /^[a-zA-Z][a-zA-Z0-9]+([ ]|[a-zA-Z])\(/gm
-      if (!validateFunc.exec(cmd)) {
-        output("Please enter a valid invoke syntax", "error")
-        return
-      }
-
-      if (funcParams[funcParams.length - 1] !== ")") {
-        output("Please enter a valid invoke syntax. The input must end with ')'", "error")
-        return
-      }
-
       const cloudCallback = w.functionsService.httpsCallable(funcName)
       try {
         // eslint-disable-next-line no-eval
