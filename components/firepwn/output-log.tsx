@@ -9,7 +9,7 @@ export function OutputLog() {
   const { logs, clearLogs } = useFirebase()
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
+    <div className="flex h-full flex-col overflow-hidden border-t border-border bg-card">
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="flex items-center gap-2">
           <Terminal className="h-4 w-4 text-primary" />
@@ -31,7 +31,6 @@ export function OutputLog() {
       </div>
       <div
         className="log-scroll flex-1 overflow-y-auto"
-        style={{ maxHeight: "400px" }}
         role="log"
         aria-live="polite"
       >
