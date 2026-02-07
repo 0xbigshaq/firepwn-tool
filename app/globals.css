@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 43 96% 56%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 43 96% 56%;
+    --radius: 0.5rem;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar for log */
+.log-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.log-scroll::-webkit-scrollbar-track {
+  background: hsl(0 0% 7%);
+}
+.log-scroll::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 20%);
+  border-radius: 3px;
+}
+.log-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 30%);
+}
