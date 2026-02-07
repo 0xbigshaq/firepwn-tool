@@ -1,12 +1,17 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { Terminal, Trash2 } from "lucide-react"
+import { Terminal, Trash2, PanelBottom, PanelRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFirebase } from "@/lib/firebase-context"
 import { cn } from "@/lib/utils"
 
-export function OutputLog() {
+interface OutputLogProps {
+  direction: "vertical" | "horizontal"
+  onToggleDirection: () => void
+}
+
+export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
   const { logs, clearLogs } = useFirebase()
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -18,7 +23,7 @@ export function OutputLog() {
   }, [logs])
 
   return (
-    <div className="flex h-full flex-col overflow-hidden border-t border-border bg-card">
+    <div className={cn("flex h-full flex-col overflow-hidden border-border bg-card", direction === "vertical" ? "border-t" : "border-l")}>
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="flex items-center gap-2">
           <Terminal className="h-4 w-4 text-primary" />
@@ -27,16 +32,31 @@ export function OutputLog() {
             {logs.length}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={clearLogs}
-          disabled={logs.length === 0}
-          className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-          Clear
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleDirection}
+            className="h-7 px-2 text-muted-foreground hover:text-foreground"
+            title={direction === "vertical" ? "Move panel to right" : "Move panel to bottom"}
+          >
+            {direction === "vertical" ? (
+              <PanelRight className="h-3.5 w-3.5" />
+            ) : (
+              <PanelBottom className="h-3.5 w-3.5" />
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearLogs}
+            disabled={logs.length === 0}
+            className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Clear
+          </Button>
+        </div>
       </div>
       <div
         ref={scrollRef}

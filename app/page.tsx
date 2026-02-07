@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { FirebaseProvider } from "@/lib/firebase-context"
 import { Header } from "@/components/firepwn/header"
 import { InitForm } from "@/components/firepwn/init-form"
@@ -15,11 +16,13 @@ import {
 } from "@/components/ui/resizable"
 
 export default function Home() {
+  const [panelDirection, setPanelDirection] = useState<"vertical" | "horizontal">("vertical")
+
   return (
     <FirebaseProvider>
       <div className="flex h-screen flex-col bg-background">
         <Header />
-        <ResizablePanelGroup direction="vertical" className="flex-1">
+        <ResizablePanelGroup direction={panelDirection} className="flex-1">
           <ResizablePanel defaultSize={70} minSize={30}>
             <main className="h-full overflow-y-auto px-4 py-6">
               <div className="mx-auto w-full max-w-7xl">
@@ -60,7 +63,12 @@ export default function Home() {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={30} minSize={10} maxSize={70}>
-            <OutputLog />
+            <OutputLog
+              direction={panelDirection}
+              onToggleDirection={() =>
+                setPanelDirection((d) => (d === "vertical" ? "horizontal" : "vertical"))
+              }
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
