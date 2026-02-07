@@ -90,7 +90,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       content,
       type,
     }
-    setLogs((prev) => [entry, ...prev])
+    setLogs((prev) => [...prev, entry])
   }, [])
 
   const clearLogs = useCallback(() => {

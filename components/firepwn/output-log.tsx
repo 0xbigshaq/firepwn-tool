@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { Terminal, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFirebase } from "@/lib/firebase-context"
@@ -7,6 +8,14 @@ import { cn } from "@/lib/utils"
 
 export function OutputLog() {
   const { logs, clearLogs } = useFirebase()
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) {
+      el.scrollTop = el.scrollHeight
+    }
+  }, [logs])
 
   return (
     <div className="flex h-full flex-col overflow-hidden border-t border-border bg-card">
@@ -30,6 +39,7 @@ export function OutputLog() {
         </Button>
       </div>
       <div
+        ref={scrollRef}
         className="log-scroll flex-1 overflow-y-auto"
         role="log"
         aria-live="polite"
