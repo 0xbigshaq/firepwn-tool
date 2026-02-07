@@ -1,19 +1,19 @@
 "use client"
 
-import { useState } from "react"
-import { FirebaseProvider } from "@/lib/firebase-context"
+import { AuthPanel } from "@/components/firepwn/auth-panel"
+import { CloudFunctions } from "@/components/firepwn/cloud-functions"
+import { FirestoreExplorer } from "@/components/firepwn/firestore-explorer"
 import { Header } from "@/components/firepwn/header"
 import { InitForm } from "@/components/firepwn/init-form"
-import { AuthPanel } from "@/components/firepwn/auth-panel"
-import { FirestoreExplorer } from "@/components/firepwn/firestore-explorer"
-import { StorageExplorer } from "@/components/firepwn/storage-explorer"
-import { CloudFunctions } from "@/components/firepwn/cloud-functions"
 import { OutputLog } from "@/components/firepwn/output-log"
+import { StorageExplorer } from "@/components/firepwn/storage-explorer"
 import {
-  ResizablePanelGroup,
-  ResizablePanel,
   ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
 } from "@/components/ui/resizable"
+import { FirebaseProvider } from "@/lib/firebase-context"
+import { useState } from "react"
 
 export default function Home() {
   const [panelDirection, setPanelDirection] = useState<"vertical" | "horizontal">("vertical")

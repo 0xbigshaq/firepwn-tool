@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { Terminal, Trash2, PanelBottom, PanelRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFirebase } from "@/lib/firebase-context"
 import { cn } from "@/lib/utils"
+import { PanelBottom, PanelRight, Terminal, Trash2 } from "lucide-react"
+import { useEffect, useRef } from "react"
 
 interface OutputLogProps {
   direction: "vertical" | "horizontal"

@@ -2,14 +2,14 @@
 
 import React from "react"
 
-import { useState, useRef } from "react"
-import { HardDrive } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useFirebase } from "@/lib/firebase-context"
+import { HardDrive } from "lucide-react"
+import { useRef, useState } from "react"
 
 export function StorageExplorer() {
   const { state, storageOp } = useFirebase()
