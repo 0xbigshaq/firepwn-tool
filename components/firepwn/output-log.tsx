@@ -65,7 +65,7 @@ export function OutputLog() {
                     {entry.type}
                   </span>
                 </div>
-                <pre className="whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-foreground/90">
+                <pre className="pl-10 whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-foreground/90">
                   {entry.content}
                 </pre>
               </article>
