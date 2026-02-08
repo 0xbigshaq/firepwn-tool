@@ -34,6 +34,7 @@ interface FirebaseContextType {
   cancelMfa: () => void
   firestoreOp: (params: FirestoreParams) => void
   invokeCloudFunction: (cmd: string) => void
+  invokeHttpFunction: (funcName: string, args: Record<string, string>, method: "GET" | "POST") => void
   storageOp: (params: StorageParams) => void
 }
 
@@ -528,23 +529,73 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       const funcName = cmd.split("(")[0]
       const funcParams = cmd.split(funcName)[1]
 
-      const cloudCallback = w.functionsService.httpsCallable(funcName)
-      try {
-        // eslint-disable-next-line no-eval
-        eval(`cloudCallback${funcParams}.then(response => {
-          output("Invoke: ${cmd.replace(/"/g, '\\"')}\\nResponse: " + JSON.stringify(response), "success");
-        }).catch(e => {
-          let msg = "Cannot invoke ${funcName.replace(/"/g, '\\"')}. ";
-          if(e.message === 'internal') msg += "Reason: Unknown. ";
-          else if(e.message === 'not-found') msg += "Reason: Cloud Function not found. ";
-          else msg += e.message;
-          output("Error: " + msg, "error");
-        })`)
-      } catch (e: any) {
-        output(`Invalid invoke syntax: ${e.message}`, "error")
+      if (!funcName || !funcParams) {
+        output("Please enter a valid invoke syntax", "error")
+        return
       }
+
+      // Parse the arguments from the parens, e.g. "({ key: "val" })" -> { key: "val" }
+      let args: any
+      try {
+        const argsExpr = funcParams.slice(1, -1).trim()
+        args = argsExpr ? JSON.parse(argsExpr) : undefined
+      } catch (e: any) {
+        output(`Invalid arguments (must be valid JSON): ${e.message}`, "error")
+        return
+      }
+
+      const cloudCallback = w.functionsService.httpsCallable(funcName)
+      cloudCallback(args)
+        .then((response: any) => {
+          output(`Invoke: ${cmd}\nResponse: ${JSON.stringify(response)}`, "success")
+        })
+        .catch((e: any) => {
+          let msg = `Cannot invoke ${funcName}. `
+          if (e.message === "internal") msg += "Reason: Unknown. "
+          else if (e.message === "not-found") msg += "Reason: Cloud Function not found. "
+          else msg += e.message
+          output(`Error: ${msg}`, "error")
+        })
     },
     [output]
+  )
+
+  const invokeHttpFunction = useCallback(
+    (funcName: string, args: Record<string, string>, method: "GET" | "POST") => {
+      const projectId = state.config?.projectId
+      if (!projectId) {
+        output("Project ID not available", "error")
+        return
+      }
+
+      let url = `https://us-central1-${projectId}.cloudfunctions.net/${funcName}`
+
+      const fetchOpts: RequestInit = { method }
+
+      if (method === "GET" && args && Object.keys(args).length > 0) {
+        const params = new URLSearchParams(args)
+        url += `?${params.toString()}`
+      } else if (method === "POST" && args) {
+        fetchOpts.headers = { "Content-Type": "application/json" }
+        fetchOpts.body = JSON.stringify(args)
+      }
+
+      output(`${method} ${url}`, "info")
+
+      fetch(url, fetchOpts)
+        .then(async (res) => {
+          const text = await res.text()
+          if (res.ok) {
+            output(`HTTP ${res.status}\n${text}`, "success")
+          } else {
+            output(`HTTP ${res.status}\n${text}`, "error")
+          }
+        })
+        .catch((e: any) => {
+          output(`Error: ${e.message}`, "error")
+        })
+    },
+    [output, state.config]
   )
 
   const storageOp = useCallback(
@@ -696,6 +747,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         cancelMfa,
         firestoreOp,
         invokeCloudFunction,
+        invokeHttpFunction,
         storageOp,
       }}
     >
