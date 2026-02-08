@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useFirebase } from "@/lib/firebase-context"
-import { Braces, Check, Flame, TextCursorInput } from "lucide-react"
-import { useState } from "react"
+import { Braces, Check, ChevronDown, Flame, TextCursorInput } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export function InitForm() {
   const { state, initFirebase } = useFirebase()
@@ -23,6 +24,11 @@ export function InitForm() {
   })
   const [jsonInput, setJsonInput] = useState("")
   const [jsonError, setJsonError] = useState("")
+  const [open, setOpen] = useState(true)
+
+  useEffect(() => {
+    if (state.initialized) setOpen(false)
+  }, [state.initialized])
 
   const handleFieldsSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,13 +64,25 @@ export function InitForm() {
   ] as const
 
   return (
+    <Collapsible open={open} onOpenChange={setOpen}>
     <Card className="border-border bg-card">
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Flame className="h-5 w-5 text-primary" />
-          <CardTitle className="text-foreground">Initialize</CardTitle>
-        </div>
-        <CardDescription>
+        <CollapsibleTrigger asChild>
+          <button type="button" className="flex w-full items-center justify-between text-left">
+            <div className="flex items-center gap-2">
+              <Flame className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">Initialize</CardTitle>
+              {state.initialized && (
+                <span className="flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
+                  <Check className="h-3 w-3" /> Connected
+                </span>
+              )}
+            </div>
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+        <CardDescription className="mt-2">
           Enter your{" "}
           <a
             href="https://firebase.google.com/docs/web/setup#config-object"
@@ -98,7 +116,9 @@ export function InitForm() {
             </Button>
           </div>
         )}
+        </CollapsibleContent>
       </CardHeader>
+      <CollapsibleContent>
       <CardContent>
         {view === "fields" ? (
           <form onSubmit={handleFieldsSubmit} className="flex flex-col gap-4">
@@ -185,6 +205,8 @@ export function InitForm() {
           </form>
         )}
       </CardContent>
+      </CollapsibleContent>
     </Card>
+    </Collapsible>
   )
 }
