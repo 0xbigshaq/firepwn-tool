@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button"
 import { useFirebase } from "@/lib/firebase-context"
 import { cn } from "@/lib/utils"
-import { PanelBottom, PanelRight, Terminal, Trash2 } from "lucide-react"
+import { ArrowDownUp, PanelBottom, PanelRight, Terminal, Trash2 } from "lucide-react"
 import { Highlight, themes } from "prism-react-renderer"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 function parseJsonParts(content: string): { text: string; isJson: boolean }[] {
   const parts: { text: string; isJson: boolean }[] = []
@@ -119,13 +119,18 @@ interface OutputLogProps {
 export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
   const { logs, clearLogs } = useFirebase()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [newestFirst, setNewestFirst] = useState(true)
 
   useEffect(() => {
     const el = scrollRef.current
     if (el) {
-      el.scrollTop = el.scrollHeight
+      if (newestFirst) {
+        el.scrollTop = 0
+      } else {
+        el.scrollTop = el.scrollHeight
+      }
     }
-  }, [logs])
+  }, [logs, newestFirst])
 
   return (
     <div className={cn("flex h-full flex-col overflow-hidden border-border bg-card", direction === "vertical" ? "border-t" : "border-l")}>
@@ -154,6 +159,15 @@ export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => setNewestFirst((v) => !v)}
+            className="h-7 px-2 text-muted-foreground hover:text-foreground"
+            title={newestFirst ? "Newest first (click to reverse)" : "Oldest first (click to reverse)"}
+          >
+            <ArrowDownUp className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={clearLogs}
             disabled={logs.length === 0}
             className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
@@ -175,7 +189,7 @@ export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
           </div>
         ) : (
           <div className="flex flex-col divide-y divide-border">
-            {logs.map((entry) => (
+            {(newestFirst ? [...logs].reverse() : logs).map((entry) => (
               <article key={entry.id} className="px-4 py-3">
                 <div className="mb-1 flex items-center gap-2">
                   <span className="font-mono text-xs text-muted-foreground">{entry.time}</span>
