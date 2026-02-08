@@ -4,7 +4,112 @@ import { Button } from "@/components/ui/button"
 import { useFirebase } from "@/lib/firebase-context"
 import { cn } from "@/lib/utils"
 import { PanelBottom, PanelRight, Terminal, Trash2 } from "lucide-react"
+import { Highlight, themes } from "prism-react-renderer"
 import { useEffect, useRef } from "react"
+
+function parseJsonParts(content: string): { text: string; isJson: boolean }[] {
+  const parts: { text: string; isJson: boolean }[] = []
+  let remaining = content
+
+  while (remaining.length > 0) {
+    const braceIdx = remaining.search(/[{[]/)
+    if (braceIdx === -1) {
+      parts.push({ text: remaining, isJson: false })
+      break
+    }
+
+    if (braceIdx > 0) {
+      parts.push({ text: remaining.slice(0, braceIdx), isJson: false })
+      remaining = remaining.slice(braceIdx)
+    }
+
+    // Bracket-match to find the closing brace
+    let depth = 0
+    let inStr = false
+    let esc = false
+    let endIdx = -1
+
+    for (let j = 0; j < remaining.length; j++) {
+      const c = remaining[j]
+      if (esc) { esc = false; continue }
+      if (c === "\\" && inStr) { esc = true; continue }
+      if (c === '"') { inStr = !inStr; continue }
+      if (inStr) continue
+      if (c === "{" || c === "[") depth++
+      if (c === "}" || c === "]") {
+        depth--
+        if (depth === 0) { endIdx = j; break }
+      }
+    }
+
+    if (endIdx !== -1) {
+      const candidate = remaining.slice(0, endIdx + 1)
+      try {
+        const parsed = JSON.parse(candidate)
+        parts.push({ text: JSON.stringify(parsed, null, 2), isJson: true })
+        remaining = remaining.slice(endIdx + 1)
+        continue
+      } catch {
+        // Not valid JSON
+      }
+    }
+
+    // Not valid JSON — consume the opening brace as text
+    const last = parts[parts.length - 1]
+    if (last && !last.isJson) {
+      last.text += remaining[0]
+    } else {
+      parts.push({ text: remaining[0], isJson: false })
+    }
+    remaining = remaining.slice(1)
+  }
+
+  return parts
+}
+
+function LogContent({ content }: { content: string }) {
+  const parts = parseJsonParts(content)
+
+  if (!parts.some((p) => p.isJson)) {
+    return (
+      <pre className="whitespace-pre-wrap break-all pl-10 font-mono text-xs leading-relaxed text-foreground/90">
+        {content}
+      </pre>
+    )
+  }
+
+  return (
+    <div className="pl-10">
+      {parts.map((part, i) =>
+        part.isJson ? (
+          <Highlight key={i} theme={themes.vsDark} code={part.text} language="json">
+            {({ style, tokens, getLineProps, getTokenProps }) => (
+              <pre
+                style={style}
+                className="my-1 overflow-auto rounded-md border border-border px-3 py-2 text-xs"
+              >
+                {tokens.map((line, j) => (
+                  <div key={j} {...getLineProps({ line })}>
+                    {line.map((token, k) => (
+                      <span key={k} {...getTokenProps({ token })} />
+                    ))}
+                  </div>
+                ))}
+              </pre>
+            )}
+          </Highlight>
+        ) : (
+          <pre
+            key={i}
+            className="whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-foreground/90"
+          >
+            {part.text}
+          </pre>
+        )
+      )}
+    </div>
+  )
+}
 
 interface OutputLogProps {
   direction: "vertical" | "horizontal"
@@ -85,9 +190,7 @@ export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
                     {entry.type}
                   </span>
                 </div>
-                <pre className="pl-10 whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-foreground/90">
-                  {entry.content}
-                </pre>
+                <LogContent content={entry.content} />
               </article>
             ))}
           </div>

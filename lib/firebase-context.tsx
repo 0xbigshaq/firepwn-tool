@@ -592,7 +592,11 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           }
         })
         .catch((e: any) => {
-          output(`Error: ${e.message}`, "error")
+          if (e instanceof TypeError && e.message === "Failed to fetch") {
+            output("CORS Error: try running Chrome with `--disable-web-security` or change your CORS policy in the backend", "error")
+          } else {
+            output(`Error: ${e.message}`, "error")
+          }
         })
     },
     [output, state.config]
