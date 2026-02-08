@@ -67,13 +67,31 @@ function parseJsonParts(content: string): { text: string; isJson: boolean }[] {
   return parts
 }
 
+function Linkify({ text }: { text: string }) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const parts = text.split(urlRegex)
+  return (
+    <>
+      {parts.map((part, i) =>
+        urlRegex.test(part) ? (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+            {part}
+          </a>
+        ) : (
+          part
+        )
+      )}
+    </>
+  )
+}
+
 function LogContent({ content }: { content: string }) {
   const parts = parseJsonParts(content)
 
   if (!parts.some((p) => p.isJson)) {
     return (
       <pre className="whitespace-pre-wrap break-all pl-10 font-mono text-xs leading-relaxed text-foreground/90">
-        {content}
+        <Linkify text={content} />
       </pre>
     )
   }
@@ -103,7 +121,7 @@ function LogContent({ content }: { content: string }) {
             key={i}
             className="whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-foreground/90"
           >
-            {part.text}
+            <Linkify text={part.text} />
           </pre>
         )
       )}
