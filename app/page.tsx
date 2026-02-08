@@ -12,7 +12,9 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FirebaseProvider } from "@/lib/firebase-context"
+import { Database, Cloud, HardDrive } from "lucide-react"
 import { useState } from "react"
 
 export default function Home() {
@@ -34,11 +36,31 @@ export default function Home() {
                   <InitForm />
 
                   <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-                    <div className="flex flex-col gap-6">
-                      <FirestoreExplorer />
-                      <StorageExplorer />
-                      <CloudFunctions />
-                    </div>
+                    <Tabs defaultValue="firestore">
+                      <TabsList>
+                        <TabsTrigger value="firestore" className="gap-1.5">
+                          <Database className="h-3.5 w-3.5" />
+                          Firestore
+                        </TabsTrigger>
+                        <TabsTrigger value="storage" className="gap-1.5">
+                          <HardDrive className="h-3.5 w-3.5" />
+                          Storage
+                        </TabsTrigger>
+                        <TabsTrigger value="functions" className="gap-1.5">
+                          <Cloud className="h-3.5 w-3.5" />
+                          Cloud Functions
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="firestore">
+                        <FirestoreExplorer />
+                      </TabsContent>
+                      <TabsContent value="storage">
+                        <StorageExplorer />
+                      </TabsContent>
+                      <TabsContent value="functions">
+                        <CloudFunctions />
+                      </TabsContent>
+                    </Tabs>
                     <div>
                       <div className="sticky top-6">
                         <AuthPanel />
