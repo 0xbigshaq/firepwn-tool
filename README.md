@@ -35,6 +35,8 @@ Full CRUD operations on Firestore:
 - **Update** - modify specific fields in existing documents
 - **Delete** - remove documents
 
+![./screenshots/firestore-get.png](./screenshots/firestore-get.png)
+
 Supports nested collections/subcollections.
 
 ### Cloud Storage
