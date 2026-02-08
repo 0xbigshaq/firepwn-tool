@@ -100,22 +100,20 @@ export function CloudFunctions() {
           <button
             type="button"
             onClick={() => setMode("callable")}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              mode === "callable"
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
-            }`}
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${mode === "callable"
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
           >
             Callable (on_call)
           </button>
           <button
             type="button"
             onClick={() => setMode("http")}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              mode === "http"
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
-            }`}
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${mode === "http"
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
           >
             HTTP (on_request)
           </button>

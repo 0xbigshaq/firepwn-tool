@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { ShieldCheck, LogOut, Copy, KeyRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFirebase } from "@/lib/firebase-context"
+import { Copy, KeyRound, LogOut, ShieldCheck } from "lucide-react"
+import { useState } from "react"
 
 function MfaDialog() {
   const { verifyMfaCode, cancelMfa } = useFirebase()
@@ -61,7 +61,7 @@ export function AuthPanel() {
 
   const handleCopyUid = () => {
     if (!state.authUser?.uid) return
-    navigator.clipboard.writeText(state.authUser.uid).catch(() => {})
+    navigator.clipboard.writeText(state.authUser.uid).catch(() => { })
   }
 
   if (!state.initialized) return null

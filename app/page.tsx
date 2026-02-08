@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/resizable"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FirebaseProvider, useFirebase } from "@/lib/firebase-context"
-import { Database, Cloud, HardDrive } from "lucide-react"
+import { Cloud, Database, HardDrive } from "lucide-react"
 import { useState } from "react"
 
 function MainContent() {

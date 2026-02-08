@@ -4,10 +4,10 @@ import React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useFirebase } from "@/lib/firebase-context"
 import { Braces, Check, ChevronDown, Flame, TextCursorInput } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -65,148 +65,148 @@ export function InitForm() {
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-    <Card className="border-border bg-card">
-      <CardHeader>
-        <CollapsibleTrigger asChild>
-          <button type="button" className="flex w-full items-center justify-between text-left">
-            <div className="flex items-center gap-2">
-              <Flame className="h-5 w-5 text-primary" />
-              <CardTitle className="text-foreground">Initialize</CardTitle>
-              {state.initialized && (
-                <span className="flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
-                  <Check className="h-3 w-3" /> Connected
-                </span>
-              )}
-            </div>
-            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
-          </button>
-        </CollapsibleTrigger>
+      <Card className="border-border bg-card">
+        <CardHeader>
+          <CollapsibleTrigger asChild>
+            <button type="button" className="flex w-full items-center justify-between text-left">
+              <div className="flex items-center gap-2">
+                <Flame className="h-5 w-5 text-primary" />
+                <CardTitle className="text-foreground">Initialize</CardTitle>
+                {state.initialized && (
+                  <span className="flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
+                    <Check className="h-3 w-3" /> Connected
+                  </span>
+                )}
+              </div>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardDescription className="mt-2">
+              Enter your{" "}
+              <a
+                href="https://firebase.google.com/docs/web/setup#config-object"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline underline-offset-2 hover:text-primary/80"
+              >
+                firebaseConfig
+              </a>{" "}
+              object below
+            </CardDescription>
+            {!state.initialized && (
+              <div className="flex items-center gap-1 mt-2">
+                <Button
+                  variant={view === "fields" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setView("fields")}
+                  className="h-7 gap-1.5 px-3 text-xs"
+                >
+                  <TextCursorInput className="h-3.5 w-3.5" />
+                  Fields
+                </Button>
+                <Button
+                  variant={view === "json" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setView("json")}
+                  className="h-7 gap-1.5 px-3 text-xs"
+                >
+                  <Braces className="h-3.5 w-3.5" />
+                  JSON
+                </Button>
+              </div>
+            )}
+          </CollapsibleContent>
+        </CardHeader>
         <CollapsibleContent>
-        <CardDescription className="mt-2">
-          Enter your{" "}
-          <a
-            href="https://firebase.google.com/docs/web/setup#config-object"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline underline-offset-2 hover:text-primary/80"
-          >
-            firebaseConfig
-          </a>{" "}
-          object below
-        </CardDescription>
-        {!state.initialized && (
-          <div className="flex items-center gap-1 mt-2">
-            <Button
-              variant={view === "fields" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("fields")}
-              className="h-7 gap-1.5 px-3 text-xs"
-            >
-              <TextCursorInput className="h-3.5 w-3.5" />
-              Fields
-            </Button>
-            <Button
-              variant={view === "json" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("json")}
-              className="h-7 gap-1.5 px-3 text-xs"
-            >
-              <Braces className="h-3.5 w-3.5" />
-              JSON
-            </Button>
-          </div>
-        )}
-        </CollapsibleContent>
-      </CardHeader>
-      <CollapsibleContent>
-      <CardContent>
-        {view === "fields" ? (
-          <form onSubmit={handleFieldsSubmit} className="flex flex-col gap-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              {fields.map((field) => (
-                <div key={field.key} className="flex flex-col gap-1.5">
-                  <Label htmlFor={field.key} className="text-sm text-muted-foreground">
-                    {field.label}
-                  </Label>
-                  <Input
-                    id={field.key}
-                    type="text"
-                    required={field.required}
-                    disabled={state.initialized}
-                    placeholder={field.placeholder}
-                    value={config[field.key]}
-                    onChange={(e) => setConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                    className="border-border bg-secondary text-foreground placeholder:text-muted-foreground"
-                  />
+          <CardContent>
+            {view === "fields" ? (
+              <form onSubmit={handleFieldsSubmit} className="flex flex-col gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  {fields.map((field) => (
+                    <div key={field.key} className="flex flex-col gap-1.5">
+                      <Label htmlFor={field.key} className="text-sm text-muted-foreground">
+                        {field.label}
+                      </Label>
+                      <Input
+                        id={field.key}
+                        type="text"
+                        required={field.required}
+                        disabled={state.initialized}
+                        placeholder={field.placeholder}
+                        value={config[field.key]}
+                        onChange={(e) => setConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                        className="border-border bg-secondary text-foreground placeholder:text-muted-foreground"
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div>
-              <Button
-                type="submit"
-                disabled={state.initialized}
-                className={
-                  state.initialized
-                    ? "bg-success text-success-foreground"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                }
-              >
-                {state.initialized ? (
-                  <>
-                    <Check className="mr-1.5 h-4 w-4" /> Initialized
-                  </>
-                ) : (
-                  "Start"
-                )}
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <form onSubmit={handleJsonSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="json-config" className="text-sm text-muted-foreground">
-                Paste firebaseConfig JSON
-              </Label>
-              <Textarea
-                id="json-config"
-                rows={8}
-                disabled={state.initialized}
-                placeholder={'{\n  apiKey: "AIzaSy...",\n  authDomain: "your-project.firebaseapp.com",\n  projectId: "your-project-id",\n  storageBucket: "your-bucket.appspot.com"\n}'}
-                value={jsonInput}
-                onChange={(e) => {
-                  setJsonInput(e.target.value)
-                  setJsonError("")
-                }}
-                className="border-border bg-secondary font-mono text-sm text-foreground placeholder:text-muted-foreground"
-              />
-              {jsonError && (
-                <p className="text-xs text-destructive">{jsonError}</p>
-              )}
-            </div>
-            <div>
-              <Button
-                type="submit"
-                disabled={state.initialized}
-                className={
-                  state.initialized
-                    ? "bg-success text-success-foreground"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                }
-              >
-                {state.initialized ? (
-                  <>
-                    <Check className="mr-1.5 h-4 w-4" /> Initialized
-                  </>
-                ) : (
-                  "Start"
-                )}
-              </Button>
-            </div>
-          </form>
-        )}
-      </CardContent>
-      </CollapsibleContent>
-    </Card>
+                <div>
+                  <Button
+                    type="submit"
+                    disabled={state.initialized}
+                    className={
+                      state.initialized
+                        ? "bg-success text-success-foreground"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    }
+                  >
+                    {state.initialized ? (
+                      <>
+                        <Check className="mr-1.5 h-4 w-4" /> Initialized
+                      </>
+                    ) : (
+                      "Start"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleJsonSubmit} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="json-config" className="text-sm text-muted-foreground">
+                    Paste firebaseConfig JSON
+                  </Label>
+                  <Textarea
+                    id="json-config"
+                    rows={8}
+                    disabled={state.initialized}
+                    placeholder={'{\n  apiKey: "AIzaSy...",\n  authDomain: "your-project.firebaseapp.com",\n  projectId: "your-project-id",\n  storageBucket: "your-bucket.appspot.com"\n}'}
+                    value={jsonInput}
+                    onChange={(e) => {
+                      setJsonInput(e.target.value)
+                      setJsonError("")
+                    }}
+                    className="border-border bg-secondary font-mono text-sm text-foreground placeholder:text-muted-foreground"
+                  />
+                  {jsonError && (
+                    <p className="text-xs text-destructive">{jsonError}</p>
+                  )}
+                </div>
+                <div>
+                  <Button
+                    type="submit"
+                    disabled={state.initialized}
+                    className={
+                      state.initialized
+                        ? "bg-success text-success-foreground"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    }
+                  >
+                    {state.initialized ? (
+                      <>
+                        <Check className="mr-1.5 h-4 w-4" /> Initialized
+                      </>
+                    ) : (
+                      "Start"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
     </Collapsible>
   )
 }
