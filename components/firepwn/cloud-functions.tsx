@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useFirebase } from "@/lib/firebase-context"
 import { Cloud } from "lucide-react"
 import { Highlight, themes } from "prism-react-renderer"
@@ -47,8 +41,7 @@ const REGIONS = [
 ] as const
 
 export function CloudFunctions() {
-  const { state, region, setRegion, invokeCloudFunction, invokeHttpFunction } =
-    useFirebase()
+  const { state, region, setRegion, invokeCloudFunction, invokeHttpFunction } = useFirebase()
   const [cmd, setCmd] = useState("")
   const [mode, setMode] = useState<Mode>("callable")
   const [httpMethod, setHttpMethod] = useState<HttpMethod>("GET")
@@ -64,9 +57,7 @@ export function CloudFunctions() {
       const argsExpr = params.slice(1, -1).trim()
       let prettyArgs: string
       try {
-        prettyArgs = argsExpr
-          ? JSON.stringify(JSON.parse(argsExpr), null, 2)
-          : ""
+        prettyArgs = argsExpr ? JSON.stringify(JSON.parse(argsExpr), null, 2) : ""
       } catch {
         prettyArgs = argsExpr
       }
@@ -153,9 +144,7 @@ export function CloudFunctions() {
             type="button"
             onClick={() => setMode("callable")}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              mode === "callable"
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
+              mode === "callable" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
             Callable (on_call)
@@ -164,9 +153,7 @@ export function CloudFunctions() {
             type="button"
             onClick={() => setMode("http")}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              mode === "http"
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
+              mode === "http" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
             HTTP (on_request)
@@ -175,38 +162,26 @@ export function CloudFunctions() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {mode === "callable" ? (
             <div className="flex flex-col gap-1.5">
-              <Label
-                htmlFor="cloud-cmd"
-                className="text-xs text-muted-foreground"
-              >
+              <Label htmlFor="cloud-cmd" className="text-xs text-muted-foreground">
                 Invoke a Cloud Function
               </Label>
               <Input
                 id="cloud-cmd"
                 type="text"
                 required
-                placeholder={
-                  'makeAdmin({ "email": "shaq@pwn.com", "isAdmin": true })'
-                }
+                placeholder={'makeAdmin({ "email": "shaq@pwn.com", "isAdmin": true })'}
                 value={cmd}
                 onChange={(e) => setCmd(e.target.value)}
                 className="border-border bg-secondary font-mono text-sm text-foreground"
               />
-              <p className="text-xs text-muted-foreground">
-                {'Format: functionName({ "param1": "value", "param2": true })'}
-              </p>
+              <p className="text-xs text-muted-foreground">{'Format: functionName({ "param1": "value", "param2": true })'}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               <div className="flex gap-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    Method
-                  </Label>
-                  <Select
-                    value={httpMethod}
-                    onValueChange={(v) => setHttpMethod(v as HttpMethod)}
-                  >
+                  <Label className="text-xs text-muted-foreground">Method</Label>
+                  <Select value={httpMethod} onValueChange={(v) => setHttpMethod(v as HttpMethod)}>
                     <SelectTrigger className="w-[5.5rem] border-border bg-secondary text-sm text-foreground">
                       <SelectValue />
                     </SelectTrigger>
@@ -217,10 +192,7 @@ export function CloudFunctions() {
                   </Select>
                 </div>
                 <div className="flex flex-1 flex-col gap-1.5">
-                  <Label
-                    htmlFor="http-func"
-                    className="text-xs text-muted-foreground"
-                  >
+                  <Label htmlFor="http-func" className="text-xs text-muted-foreground">
                     Function name
                   </Label>
                   <Input
@@ -235,13 +207,8 @@ export function CloudFunctions() {
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label
-                  htmlFor="http-args"
-                  className="text-xs text-muted-foreground"
-                >
-                  {httpMethod === "GET"
-                    ? "Query params (JSON)"
-                    : "Request body (JSON)"}
+                <Label htmlFor="http-args" className="text-xs text-muted-foreground">
+                  {httpMethod === "GET" ? "Query params (JSON)" : "Request body (JSON)"}
                 </Label>
                 <Input
                   id="http-args"
@@ -256,19 +223,10 @@ export function CloudFunctions() {
           )}
           {callPreview && (
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs text-muted-foreground">
-                Call preview
-              </Label>
-              <Highlight
-                theme={themes.vsDark}
-                code={callPreview}
-                language="javascript"
-              >
+              <Label className="text-xs text-muted-foreground">Call preview</Label>
+              <Highlight theme={themes.vsDark} code={callPreview} language="javascript">
                 {({ style, tokens, getLineProps, getTokenProps }) => (
-                  <pre
-                    style={style}
-                    className="overflow-auto rounded-md border border-border px-3 py-2 text-xs"
-                  >
+                  <pre style={style} className="overflow-auto rounded-md border border-border px-3 py-2 text-xs">
                     {tokens.map((line, i) => (
                       <div key={i} {...getLineProps({ line })}>
                         {line.map((token, key) => (
@@ -282,10 +240,7 @@ export function CloudFunctions() {
             </div>
           )}
           <div>
-            <Button
-              type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
+            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
               {mode === "callable" ? "Invoke" : `Send ${httpMethod}`}
             </Button>
           </div>

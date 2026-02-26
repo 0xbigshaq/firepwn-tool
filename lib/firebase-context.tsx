@@ -1,13 +1,6 @@
 "use client"
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
 
 export interface LogEntry {
   id: string
@@ -29,10 +22,7 @@ interface FirebaseContextType {
   logs: LogEntry[]
   region: string
   setRegion: (region: string) => void
-  initFirebase: (
-    config: Record<string, string>,
-    regionOverride?: string
-  ) => void
+  initFirebase: (config: Record<string, string>, regionOverride?: string) => void
   clearSavedConfig: () => void
   output: (content: string, type?: "info" | "error" | "success") => void
   clearLogs: () => void
@@ -46,11 +36,7 @@ interface FirebaseContextType {
   cancelMfa: () => void
   firestoreOp: (params: FirestoreParams) => void
   invokeCloudFunction: (cmd: string) => void
-  invokeHttpFunction: (
-    funcName: string,
-    args: Record<string, string>,
-    method: "GET" | "POST"
-  ) => void
+  invokeHttpFunction: (funcName: string, args: Record<string, string>, method: "GET" | "POST") => void
   storageOp: (params: StorageParams) => void
 }
 
@@ -119,19 +105,16 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const output = useCallback(
-    (content: string, type: "info" | "error" | "success" = "info") => {
-      const time = new Date().toLocaleTimeString()
-      const entry: LogEntry = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        time,
-        content,
-        type,
-      }
-      setLogs((prev) => [...prev, entry])
-    },
-    []
-  )
+  const output = useCallback((content: string, type: "info" | "error" | "success" = "info") => {
+    const time = new Date().toLocaleTimeString()
+    const entry: LogEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      time,
+      content,
+      type,
+    }
+    setLogs((prev) => [...prev, entry])
+  }, [])
 
   const clearLogs = useCallback(() => {
     setLogs([])
@@ -144,10 +127,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       const firebase = w.firebase
 
       if (!firebase) {
-        output(
-          "Firebase SDK not loaded. Please check your connection.",
-          "error"
-        )
+        output("Firebase SDK not loaded. Please check your connection.", "error")
         return
       }
 
@@ -181,15 +161,9 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
       if (firebaseConfig.storageBucket) {
         w.storageService = firebase.storage()
-        output(
-          `Storage service initialized with bucket: ${firebaseConfig.storageBucket}`,
-          "success"
-        )
+        output(`Storage service initialized with bucket: ${firebaseConfig.storageBucket}`, "success")
       } else {
-        output(
-          "Storage service not initialized (no storageBucket provided)",
-          "info"
-        )
+        output("Storage service not initialized (no storageBucket provided)", "info")
       }
 
       // Auth state listener
@@ -200,8 +174,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             authUser: { email: user.email, uid: user.uid },
           }))
           const email = user.email || "unknown"
-          const logMessage =
-            nextAuthLogMessageRef.current || `Logged in (${email})`
+          const logMessage = nextAuthLogMessageRef.current || `Logged in (${email})`
           output(logMessage, "success")
           nextAuthLogMessageRef.current = null
         } else {
@@ -255,10 +228,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       mfaVerificationId: null,
     })
     setLogs([])
-    output(
-      "Saved configuration cleared. You can now enter a new config.",
-      "info"
-    )
+    output("Saved configuration cleared. You can now enter a new config.", "info")
   }, [output])
 
   // Auto-init from saved config on mount
@@ -286,18 +256,16 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     (email: string, password: string) => {
       const w = window as any
       if (!w.authService) return
-      w.authService
-        .signInWithEmailAndPassword(email, password)
-        .catch((e: any) => {
-          if (e.code === "auth/multi-factor-auth-required") {
-            w.mfaResolver = e.resolver
-            setState((prev) => ({ ...prev, mfaResolver: e.resolver }))
-            setShowMfaDialog(true)
-            output("MFA Required: Please enter your verification code.", "info")
-          } else {
-            output(`Error: Firebase auth failed - ${e.message}`, "error")
-          }
-        })
+      w.authService.signInWithEmailAndPassword(email, password).catch((e: any) => {
+        if (e.code === "auth/multi-factor-auth-required") {
+          w.mfaResolver = e.resolver
+          setState((prev) => ({ ...prev, mfaResolver: e.resolver }))
+          setShowMfaDialog(true)
+          output("MFA Required: Please enter your verification code.", "info")
+        } else {
+          output(`Error: Firebase auth failed - ${e.message}`, "error")
+        }
+      })
     },
     [output]
   )
@@ -363,29 +331,16 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       }
 
       const selectedHint = enrolledFactors[0]
-      output(
-        `MFA Verification: Attempting to verify ${selectedHint.factorId} code...`,
-        "info"
-      )
+      output(`MFA Verification: Attempting to verify ${selectedHint.factorId} code...`, "info")
 
-      if (
-        selectedHint.factorId === firebase.auth.PhoneAuthProvider.PROVIDER_ID ||
-        selectedHint.factorId === "phone"
-      ) {
+      if (selectedHint.factorId === firebase.auth.PhoneAuthProvider.PROVIDER_ID || selectedHint.factorId === "phone") {
         if (w.mfaVerificationId) {
-          const credential = firebase.auth.PhoneAuthProvider.credential(
-            w.mfaVerificationId,
-            code
-          )
-          const assertion =
-            firebase.auth.PhoneMultiFactorGenerator.assertion(credential)
+          const credential = firebase.auth.PhoneAuthProvider.credential(w.mfaVerificationId, code)
+          const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(credential)
           w.mfaResolver
             .resolveSignIn(assertion)
             .then((result: any) => {
-              output(
-                `MFA Success: Logged in as ${result.user.email}`,
-                "success"
-              )
+              output(`MFA Success: Logged in as ${result.user.email}`, "success")
               setShowMfaDialog(false)
               w.mfaResolver = null
             })
@@ -403,12 +358,9 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         } else {
           // Need to send SMS first
           if (!w.recaptchaVerifier) {
-            w.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
-              "mfa-recaptcha",
-              {
-                size: "invisible",
-              }
-            )
+            w.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("mfa-recaptcha", {
+              size: "invisible",
+            })
           }
 
           const phoneInfoOptions = {
@@ -421,16 +373,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             .verifyPhoneNumber(phoneInfoOptions, w.recaptchaVerifier)
             .then((verificationId: string) => {
               w.mfaVerificationId = verificationId
-              output(
-                `MFA SMS: Verification code sent to ${selectedHint.phoneNumber || "your phone"}. Please enter the 6-digit code.`,
-                "info"
-              )
+              output(`MFA SMS: Verification code sent to ${selectedHint.phoneNumber || "your phone"}. Please enter the 6-digit code.`, "info")
             })
             .catch((smsError: any) => {
-              output(
-                `MFA Error: Failed to send SMS - ${smsError.message}`,
-                "error"
-              )
+              output(`MFA Error: Failed to send SMS - ${smsError.message}`, "error")
               if (w.recaptchaVerifier) {
                 w.recaptchaVerifier.clear()
                 w.recaptchaVerifier = null
@@ -459,19 +405,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      const {
-        collectionName,
-        op,
-        docId,
-        jsonInput,
-        limit,
-        sortField,
-        sortDirection,
-        filterField,
-        filterOp: fOp,
-        filterValue,
-        mergeEnabled,
-      } = params
+      const { collectionName, op, docId, jsonInput, limit, sortField, sortDirection, filterField, filterOp: fOp, filterValue, mergeEnabled } = params
 
       // Validations
       if (sortField && ["set", "update", "delete"].includes(op)) {
@@ -479,28 +413,19 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         return
       }
       if (sortField && docId) {
-        output(
-          "Sorting cannot be used when querying a specific document ID",
-          "error"
-        )
+        output("Sorting cannot be used when querying a specific document ID", "error")
         return
       }
       if (sortField && !/^[a-zA-Z][a-zA-Z0-9_.]*$/.test(sortField)) {
         output("Invalid sort field name", "error")
         return
       }
-      if (
-        (filterField || fOp || filterValue) &&
-        ["set", "update", "delete"].includes(op)
-      ) {
+      if ((filterField || fOp || filterValue) && ["set", "update", "delete"].includes(op)) {
         output("Filtering is only available for GET operations", "error")
         return
       }
       if (filterField && docId) {
-        output(
-          "Filtering cannot be used when querying a specific document ID",
-          "error"
-        )
+        output("Filtering cannot be used when querying a specific document ID", "error")
         return
       }
       if (filterField && !/^[a-zA-Z][a-zA-Z0-9_.]*$/.test(filterField)) {
@@ -508,17 +433,11 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         return
       }
       if (filterField && (!fOp || !filterValue)) {
-        output(
-          "When using filters, you must specify field, operator, and value",
-          "error"
-        )
+        output("When using filters, you must specify field, operator, and value", "error")
         return
       }
       if (fOp && (!filterField || !filterValue)) {
-        output(
-          "When using filters, you must specify field, operator, and value",
-          "error"
-        )
+        output("When using filters, you must specify field, operator, and value", "error")
         return
       }
 
@@ -536,18 +455,13 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           try {
             if (docId) {
               const setOptions = mergeEnabled ? { merge: true } : {}
-              const operationType = mergeEnabled
-                ? "merged"
-                : "overwritten/created"
+              const operationType = mergeEnabled ? "merged" : "overwritten/created"
               w.firestoreService
                 .collection(collectionName)
                 .doc(docId)
                 .set(parsedJson, setOptions)
                 .then(() => {
-                  output(
-                    `Document ${operationType} (ID: ${docId}) ${mergeEnabled ? "(with merge: true)" : ""}\nResult: ${formatJsonOutput(parsedJson)}`,
-                    "success"
-                  )
+                  output(`Document ${operationType} (ID: ${docId}) ${mergeEnabled ? "(with merge: true)" : ""}\nResult: ${formatJsonOutput(parsedJson)}`, "success")
                 })
                 .catch((e: any) => output(`Error: ${e.message}`, "error"))
             } else {
@@ -564,10 +478,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           }
         } else if (op === "update") {
           if (!docId) {
-            output(
-              "Document ID field is mandatory when trying to update a record",
-              "error"
-            )
+            output("Document ID field is mandatory when trying to update a record", "error")
             return
           }
           w.firestoreService
@@ -575,10 +486,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             .doc(docId)
             .update(parsedJson)
             .then(() => {
-              output(
-                `Updated fields (Doc ID: ${docId})\n${formatJsonOutput(parsedJson)}`,
-                "success"
-              )
+              output(`Updated fields (Doc ID: ${docId})\n${formatJsonOutput(parsedJson)}`, "success")
             })
             .catch((e: any) => output(`Error: ${e.message}`, "error"))
         }
@@ -595,10 +503,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                   output(`Document ${docId} not found`, "error")
                   return
                 }
-                output(
-                  `Getting ${docId} from ${collectionName}\nResponse:\n${formatJsonOutput(data)}`,
-                  "success"
-                )
+                output(`Getting ${docId} from ${collectionName}\nResponse:\n${formatJsonOutput(data)}`, "success")
               })
               .catch((e: any) => output(`Error: ${e.message}`, "error"))
           } else {
@@ -607,13 +512,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             if (filterField && fOp && filterValue) {
               let parsedFilterValue: any
               try {
-                if (
-                  filterValue.startsWith("[") ||
-                  filterValue.startsWith("{") ||
-                  filterValue === "true" ||
-                  filterValue === "false" ||
-                  !isNaN(Number(filterValue))
-                ) {
+                if (filterValue.startsWith("[") || filterValue.startsWith("{") || filterValue === "true" || filterValue === "false" || !isNaN(Number(filterValue))) {
                   parsedFilterValue = JSON.parse(filterValue)
                 } else {
                   parsedFilterValue = filterValue
@@ -636,12 +535,8 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
               .get()
               .then((snapshots: any) => {
                 const safeCollection = collectionName
-                const filterInfo = filterField
-                  ? ` (filtered by ${filterField} ${fOp} ${filterValue})`
-                  : ""
-                const sortInfo = sortField
-                  ? ` (sorted by ${sortField} ${sortDirection})`
-                  : ""
+                const filterInfo = filterField ? ` (filtered by ${filterField} ${fOp} ${filterValue})` : ""
+                const sortInfo = sortField ? ` (sorted by ${sortField} ${sortDirection})` : ""
                 const limitInfo = limit ? ` (limit: ${limit})` : " (no limit)"
                 let result = `Getting documents from ${safeCollection}${limitInfo}${filterInfo}${sortInfo}\nResponse (${snapshots.docs.length} documents):\n`
                 if (!snapshots.docs.length) {
@@ -669,10 +564,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         }
       } else if (op === "delete") {
         if (!docId) {
-          output(
-            "Document ID field is mandatory when trying to delete a record",
-            "error"
-          )
+          output("Document ID field is mandatory when trying to delete a record", "error")
           return
         }
         w.firestoreService
@@ -715,16 +607,12 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       const cloudCallback = w.functionsService.httpsCallable(funcName)
       cloudCallback(args)
         .then((response: any) => {
-          output(
-            `Invoke: ${cmd}\nResponse: ${JSON.stringify(response)}`,
-            "success"
-          )
+          output(`Invoke: ${cmd}\nResponse: ${JSON.stringify(response)}`, "success")
         })
         .catch((e: any) => {
           let msg = `Cannot invoke ${funcName}. `
           if (e.message === "internal") msg += "Reason: Unknown. "
-          else if (e.message === "not-found")
-            msg += "Reason: Cloud Function not found. "
+          else if (e.message === "not-found") msg += "Reason: Cloud Function not found. "
           else msg += e.message
           output(`Error: ${msg}`, "error")
         })
@@ -733,11 +621,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   )
 
   const invokeHttpFunction = useCallback(
-    async (
-      funcName: string,
-      args: Record<string, string>,
-      method: "GET" | "POST"
-    ) => {
+    async (funcName: string, args: Record<string, string>, method: "GET" | "POST") => {
       const projectId = state.config?.projectId
       if (!projectId) {
         output("Project ID not available", "error")
@@ -784,10 +668,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         })
         .catch((e: any) => {
           if (e instanceof TypeError && e.message === "Failed to fetch") {
-            output(
-              "CORS Error: try running Chrome with `--disable-web-security` or change your CORS policy in the backend",
-              "error"
-            )
+            output("CORS Error: try running Chrome with `--disable-web-security` or change your CORS policy in the backend", "error")
           } else {
             output(`Error: ${e.message}`, "error")
           }
@@ -800,10 +681,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     (params: StorageParams) => {
       const w = window as any
       if (!w.storageService) {
-        output(
-          "Storage service not initialized. Please provide a storageBucket in configuration.",
-          "error"
-        )
+        output("Storage service not initialized. Please provide a storageBucket in configuration.", "error")
         return
       }
 
@@ -812,9 +690,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       switch (sOp) {
         case "list": {
           try {
-            const listRef = path
-              ? w.storageService.ref(path)
-              : w.storageService.ref()
+            const listRef = path ? w.storageService.ref(path) : w.storageService.ref()
             listRef
               .listAll()
               .then((result: any) => {
@@ -831,9 +707,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                 }
                 output(txt, "success")
               })
-              .catch((error: any) =>
-                output(`Error listing storage: ${error.message}`, "error")
-              )
+              .catch((error: any) => output(`Error listing storage: ${error.message}`, "error"))
           } catch (error: any) {
             output(`Error: ${error.message}`, "error")
           }
@@ -856,21 +730,15 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
               "state_changed",
               (snapshot: any) => {
                 if (snapshot.totalBytes > 0) {
-                  const progress =
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                  const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
                   output(`Upload progress: ${progress.toFixed(1)}%`, "info")
                 }
               },
               (error: any) => output(`Upload error: ${error.message}`, "error"),
               () => {
-                uploadTask.snapshot.ref
-                  .getDownloadURL()
-                  .then((downloadURL: string) => {
-                    output(
-                      `Upload successful!\nFile: ${path}\nSize: ${uploadTask.snapshot.totalBytes} bytes\nDownload URL: ${downloadURL}`,
-                      "success"
-                    )
-                  })
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL: string) => {
+                  output(`Upload successful!\nFile: ${path}\nSize: ${uploadTask.snapshot.totalBytes} bytes\nDownload URL: ${downloadURL}`, "success")
+                })
               }
             )
           } catch (error: any) {
@@ -890,9 +758,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
               .then((url: string) => {
                 output(`Download URL for: ${path}\nURL: ${url}`, "success")
               })
-              .catch((error: any) =>
-                output(`Download error: ${error.message}`, "error")
-              )
+              .catch((error: any) => output(`Download error: ${error.message}`, "error"))
           } catch (error: any) {
             output(`Error: ${error.message}`, "error")
           }
@@ -908,9 +774,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
               .ref(path)
               .delete()
               .then(() => output(`Deleted: ${path}`, "success"))
-              .catch((error: any) =>
-                output(`Delete error: ${error.message}`, "error")
-              )
+              .catch((error: any) => output(`Delete error: ${error.message}`, "error"))
           } catch (error: any) {
             output(`Error: ${error.message}`, "error")
           }
@@ -926,14 +790,9 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
               .ref(path)
               .getMetadata()
               .then((metadata: any) => {
-                output(
-                  `Metadata for: ${path}\n${formatJsonOutput(metadata)}`,
-                  "success"
-                )
+                output(`Metadata for: ${path}\n${formatJsonOutput(metadata)}`, "success")
               })
-              .catch((error: any) =>
-                output(`Metadata error: ${error.message}`, "error")
-              )
+              .catch((error: any) => output(`Metadata error: ${error.message}`, "error"))
           } catch (error: any) {
             output(`Error: ${error.message}`, "error")
           }
