@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Crosshair, ShieldAlert, ChevronDown, Loader2, CheckCircle2, XCircle, AlertTriangle } from "lucide-react"
+import { Crosshair, ShieldAlert, ChevronDown, Loader2, CheckCircle2, AlertTriangle } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 
 const COMMON_COLLECTIONS = [
@@ -177,7 +177,7 @@ export function Autopwn() {
   const [results, setResults] = useState<CollectionResult[]>([])
   const [customCollections, setCustomCollections] = useState("")
   const [scanLimit, setScanLimit] = useState("5")
-  const [testWrites, setTestWrites] = useState(true)
+  const [testWrites, setTestWrites] = useState(false)
   const [expandedResults, setExpandedResults] = useState(false)
   const abortRef = useRef(false)
   const [concurrency, setConcurrency] = useState("10")
@@ -236,21 +236,10 @@ export function Autopwn() {
           sampleDocId,
           error: null,
         }
-      } catch (e: any) {
-        // Permission denied means the collection likely exists but we can't read it
-        if (e.code === "permission-denied") {
-          return {
-            name,
-            exists: true,
-            docCount: 0,
-            readAccess: "denied",
-            writeAccess: "unknown",
-            deleteAccess: "unknown",
-            sampleDocId: null,
-            error: null,
-          }
-        }
-        // Other errors (e.g., invalid collection path) - skip
+      } catch {
+        // Firestore returns permission-denied for BOTH non-existent collections
+        // and existing ones we can't access — so we can't distinguish them.
+        // Skip these to avoid false positives.
         return null
       }
     }
@@ -280,10 +269,7 @@ export function Autopwn() {
       return
     }
 
-    output(
-      `[Autopwn] Discovery complete. Found ${found.length} collections (${found.filter((r) => r.readAccess === "allowed" && r.docCount > 0).length} readable with data, ${found.filter((r) => r.readAccess === "denied").length} read-denied).`,
-      found.length > 0 ? "success" : "info"
-    )
+    output(`[Autopwn] Discovery complete. Found ${found.length} readable collection${found.length !== 1 ? "s" : ""} with data.`, found.length > 0 ? "success" : "info")
 
     // Phase 2: Test write/delete access on discovered collections
     if (testWrites && found.length > 0) {
@@ -337,17 +323,14 @@ export function Autopwn() {
     const readable = found.filter((r) => r.readAccess === "allowed")
     const writable = found.filter((r) => r.writeAccess === "allowed")
     const deletable = found.filter((r) => r.deleteAccess === "allowed")
-    const readDenied = found.filter((r) => r.readAccess === "denied")
 
     let summary = `\n[Autopwn] Scan complete!\n`
     summary += `─────────────────────────────\n`
-    summary += `Total collections found: ${found.length}\n`
-    summary += `  Readable: ${readable.length}\n`
+    summary += `Readable collections: ${readable.length}\n`
     if (testWrites) {
-      summary += `  Writable: ${writable.length}\n`
-      summary += `  Deletable: ${deletable.length}\n`
+      summary += `Writable: ${writable.length}\n`
+      summary += `Deletable: ${deletable.length}\n`
     }
-    summary += `  Read-denied: ${readDenied.length}\n`
     summary += `─────────────────────────────\n`
 
     if (readable.length > 0) {
@@ -368,13 +351,6 @@ export function Autopwn() {
       }
     }
 
-    if (readDenied.length > 0) {
-      summary += `\nRead-denied (collection likely exists):\n`
-      for (const r of readDenied) {
-        summary += `  ● ${r.name}\n`
-      }
-    }
-
     const hasSeverity = writable.length > 0 || deletable.length > 0
     output(summary, hasSeverity ? "error" : readable.length > 0 ? "success" : "info")
 
@@ -391,7 +367,6 @@ export function Autopwn() {
 
   const readableCount = results.filter((r) => r.readAccess === "allowed" && r.docCount > 0).length
   const writableCount = results.filter((r) => r.writeAccess === "allowed").length
-  const deniedCount = results.filter((r) => r.readAccess === "denied").length
 
   return (
     <Card className="border-border bg-card">
@@ -520,11 +495,6 @@ export function Autopwn() {
                         {writableCount} writable
                       </Badge>
                     )}
-                    {deniedCount > 0 && (
-                      <Badge variant="secondary" className="text-xs">
-                        {deniedCount} denied
-                      </Badge>
-                    )}
                   </div>
                 </div>
                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${expandedResults ? "rotate-180" : ""}`} />
@@ -538,8 +508,6 @@ export function Autopwn() {
                       <div className="flex items-center gap-2">
                         {r.readAccess === "allowed" && r.docCount > 0 ? (
                           <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
-                        ) : r.readAccess === "denied" ? (
-                          <XCircle className="h-4 w-4 shrink-0 text-red-500" />
                         ) : (
                           <AlertTriangle className="h-4 w-4 shrink-0 text-yellow-500" />
                         )}
