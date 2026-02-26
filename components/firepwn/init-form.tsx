@@ -14,45 +14,40 @@ import { useEffect, useState } from "react"
 
 export function InitForm() {
   const { state, initFirebase, clearSavedConfig } = useFirebase()
-  const [view, setView] = useState<"fields" | "json">(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("firepwn-view")
-      if (saved === "json" || saved === "fields") return saved
-    }
-    return "fields"
+  const [view, setView] = useState<"fields" | "json">("fields")
+  const [config, setConfig] = useState({
+    apiKey: "",
+    authDomain: "",
+    databaseURL: "",
+    projectId: "",
+    storageBucket: "",
   })
-  const [config, setConfig] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("firepwn-config")
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          return {
-            apiKey: parsed.apiKey || "",
-            authDomain: parsed.authDomain || "",
-            databaseURL: parsed.databaseURL || "",
-            projectId: parsed.projectId || "",
-            storageBucket: parsed.storageBucket || "",
-          }
-        }
-      } catch { /* noop */ }
-    }
-    return {
-      apiKey: "",
-      authDomain: "",
-      databaseURL: "",
-      projectId: "",
-      storageBucket: "",
-    }
-  })
-  const [jsonInput, setJsonInput] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("firepwn-json-input") || ""
-    }
-    return ""
-  })
+  const [jsonInput, setJsonInput] = useState("")
   const [jsonError, setJsonError] = useState("")
   const [open, setOpen] = useState(true)
+
+  // Hydrate from localStorage after mount to avoid SSR mismatch
+  useEffect(() => {
+    try {
+      const savedView = localStorage.getItem("firepwn-view")
+      if (savedView === "json" || savedView === "fields") setView(savedView)
+
+      const savedJson = localStorage.getItem("firepwn-json-input")
+      if (savedJson) setJsonInput(savedJson)
+
+      const savedConfig = localStorage.getItem("firepwn-config")
+      if (savedConfig) {
+        const parsed = JSON.parse(savedConfig)
+        setConfig({
+          apiKey: parsed.apiKey || "",
+          authDomain: parsed.authDomain || "",
+          databaseURL: parsed.databaseURL || "",
+          projectId: parsed.projectId || "",
+          storageBucket: parsed.storageBucket || "",
+        })
+      }
+    } catch { /* noop */ }
+  }, [])
 
   useEffect(() => {
     if (state.initialized) setOpen(false)

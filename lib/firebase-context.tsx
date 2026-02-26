@@ -84,13 +84,9 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   })
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [showMfaDialog, setShowMfaDialog] = useState(false)
-  const [region, setRegionState] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("firepwn-region") || "europe-west1"
-    }
-    return "europe-west1"
-  })
+  const [region, setRegionState] = useState("europe-west1")
   const nextAuthLogMessageRef = useRef<string | null>(null)
+  const initCalledRef = useRef(false)
 
   const setRegion = useCallback((newRegion: string) => {
     setRegionState(newRegion)
@@ -141,10 +137,11 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
+        // Delete existing app if any to avoid duplicate-app errors
+        try { w.app?.delete() } catch { /* noop */ }
         w.app = firebase.initializeApp(firebaseConfig)
       } catch (e: any) {
         output(`Error: ${e.message}`, "error")
-        try { w.app?.delete() } catch { /* noop */ }
         return
       }
 
@@ -211,11 +208,16 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
   // Auto-init from saved config on mount
   useEffect(() => {
+    if (initCalledRef.current) return
     try {
+      const savedRegion = localStorage.getItem("firepwn-region")
+      if (savedRegion) setRegionState(savedRegion)
+
       const saved = localStorage.getItem("firepwn-config")
       if (saved) {
         const config = JSON.parse(saved)
         if (config.apiKey) {
+          initCalledRef.current = true
           initFirebase(config)
         }
       }
