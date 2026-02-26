@@ -626,7 +626,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   )
 
   const invokeHttpFunction = useCallback(
-    (funcName: string, args: Record<string, string>, method: "GET" | "POST") => {
+    async (funcName: string, args: Record<string, string>, method: "GET" | "POST") => {
       const projectId = state.config?.projectId
       if (!projectId) {
         output("Project ID not available", "error")
@@ -635,15 +635,28 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
       let url = `https://${region}-${projectId}.cloudfunctions.net/${funcName}`
 
+      const headers: Record<string, string> = {}
       const fetchOpts: RequestInit = { method }
+
+      // Attach auth token if user is logged in
+      const w = window as any
+      try {
+        const currentUser = w.authService?.currentUser
+        if (currentUser) {
+          const idToken = await currentUser.getIdToken()
+          headers["Authorization"] = `Bearer ${idToken}`
+        }
+      } catch { /* proceed without auth */ }
 
       if (method === "GET" && args && Object.keys(args).length > 0) {
         const params = new URLSearchParams(args)
         url += `?${params.toString()}`
       } else if (method === "POST" && args) {
-        fetchOpts.headers = { "Content-Type": "application/json" }
+        headers["Content-Type"] = "application/json"
         fetchOpts.body = JSON.stringify(args)
       }
+
+      fetchOpts.headers = headers
 
       output(`${method} ${url}`, "info")
 
