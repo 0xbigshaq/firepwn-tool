@@ -21,6 +21,8 @@ interface FirebaseState {
 interface FirebaseContextType {
   state: FirebaseState
   logs: LogEntry[]
+  region: string
+  setRegion: (region: string) => void
   initFirebase: (config: Record<string, string>) => void
   output: (content: string, type?: "info" | "error" | "success") => void
   clearLogs: () => void
@@ -81,7 +83,19 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   })
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [showMfaDialog, setShowMfaDialog] = useState(false)
+  const [region, setRegionState] = useState("europe-west1")
   const nextAuthLogMessageRef = useRef<string | null>(null)
+
+  const setRegion = useCallback((newRegion: string) => {
+    setRegionState(newRegion)
+    const w = window as any
+    const firebase = w.firebase
+    if (firebase && w.app) {
+      try {
+        w.functionsService = firebase.app().functions(newRegion)
+      } catch { /* app not initialized yet */ }
+    }
+  }, [])
 
   const output = useCallback((content: string, type: "info" | "error" | "success" = "info") => {
     const time = new Date().toLocaleTimeString()
@@ -129,7 +143,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
       w.firestoreService = firebase.firestore()
       w.authService = firebase.auth()
-      w.functionsService = firebase.functions()
+      w.functionsService = firebase.app().functions(region)
 
       if (firebaseConfig.storageBucket) {
         w.storageService = firebase.storage()
@@ -568,7 +582,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      let url = `https://us-central1-${projectId}.cloudfunctions.net/${funcName}`
+      let url = `https://${region}-${projectId}.cloudfunctions.net/${funcName}`
 
       const fetchOpts: RequestInit = { method }
 
@@ -599,7 +613,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           }
         })
     },
-    [output, state.config]
+    [output, state.config, region]
   )
 
   const storageOp = useCallback(
@@ -738,6 +752,8 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       value={{
         state,
         logs,
+        region,
+        setRegion,
         initFirebase,
         output,
         clearLogs,

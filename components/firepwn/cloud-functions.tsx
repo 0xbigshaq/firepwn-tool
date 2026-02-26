@@ -15,7 +15,7 @@ type Mode = "callable" | "http"
 type HttpMethod = "GET" | "POST"
 
 export function CloudFunctions() {
-  const { state, invokeCloudFunction, invokeHttpFunction } = useFirebase()
+  const { state, region, setRegion, invokeCloudFunction, invokeHttpFunction } = useFirebase()
   const [cmd, setCmd] = useState("")
   const [mode, setMode] = useState<Mode>("callable")
   const [httpMethod, setHttpMethod] = useState<HttpMethod>("GET")
@@ -39,7 +39,7 @@ export function CloudFunctions() {
     } else {
       if (!funcName) return ""
       const projectId = state.config?.projectId ?? "<projectId>"
-      let url = `https://us-central1-${projectId}.cloudfunctions.net/${funcName}`
+      let url = `https://${region}-${projectId}.cloudfunctions.net/${funcName}`
       if (httpMethod === "GET" && httpArgs.trim()) {
         try {
           const parsed = JSON.parse(httpArgs)
@@ -60,7 +60,7 @@ export function CloudFunctions() {
       }
       return `fetch("${url}")`
     }
-  }, [cmd, mode, funcName, httpArgs, httpMethod, state.config])
+  }, [cmd, mode, funcName, httpArgs, httpMethod, state.config, region])
 
   if (!state.initialized) return null
 
@@ -93,6 +93,37 @@ export function CloudFunctions() {
         <div className="flex items-center gap-2">
           <Cloud className="h-5 w-5 text-primary" />
           <CardTitle className="text-foreground">Cloud Functions</CardTitle>
+          <div className="ml-auto flex items-center gap-1.5">
+            <Label className="text-xs text-muted-foreground">Region</Label>
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="rounded-md border border-border bg-secondary px-2 py-1 text-xs text-foreground"
+            >
+              <option value="us-central1">us-central1</option>
+              <option value="us-east1">us-east1</option>
+              <option value="us-east4">us-east4</option>
+              <option value="us-west1">us-west1</option>
+              <option value="us-west2">us-west2</option>
+              <option value="us-west3">us-west3</option>
+              <option value="us-west4">us-west4</option>
+              <option value="europe-west1">europe-west1</option>
+              <option value="europe-west2">europe-west2</option>
+              <option value="europe-west3">europe-west3</option>
+              <option value="europe-west6">europe-west6</option>
+              <option value="asia-east1">asia-east1</option>
+              <option value="asia-east2">asia-east2</option>
+              <option value="asia-northeast1">asia-northeast1</option>
+              <option value="asia-northeast2">asia-northeast2</option>
+              <option value="asia-northeast3">asia-northeast3</option>
+              <option value="asia-south1">asia-south1</option>
+              <option value="asia-southeast1">asia-southeast1</option>
+              <option value="asia-southeast2">asia-southeast2</option>
+              <option value="australia-southeast1">australia-southeast1</option>
+              <option value="northamerica-northeast1">northamerica-northeast1</option>
+              <option value="southamerica-east1">southamerica-east1</option>
+            </select>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
