@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useCallback, useContext, useRef, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
 
 
 export interface LogEntry {
@@ -24,6 +24,7 @@ interface FirebaseContextType {
   region: string
   setRegion: (region: string) => void
   initFirebase: (config: Record<string, string>) => void
+  clearSavedConfig: () => void
   output: (content: string, type?: "info" | "error" | "success") => void
   clearLogs: () => void
   signIn: (email: string, password: string) => void
@@ -83,11 +84,17 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   })
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [showMfaDialog, setShowMfaDialog] = useState(false)
-  const [region, setRegionState] = useState("europe-west1")
+  const [region, setRegionState] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("firepwn-region") || "europe-west1"
+    }
+    return "europe-west1"
+  })
   const nextAuthLogMessageRef = useRef<string | null>(null)
 
   const setRegion = useCallback((newRegion: string) => {
     setRegionState(newRegion)
+    try { localStorage.setItem("firepwn-region", newRegion) } catch { /* noop */ }
     const w = window as any
     const firebase = w.firebase
     if (firebase && w.app) {
@@ -168,11 +175,35 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         }
       })
 
+      try { localStorage.setItem("firepwn-config", JSON.stringify(firebaseConfig)) } catch { /* noop */ }
+
       setState((prev) => ({ ...prev, initialized: true, config: firebaseConfig }))
       output("Firebase initialized", "success")
     },
-    [output]
+    [output, region]
   )
+
+  const clearSavedConfig = useCallback(() => {
+    try {
+      localStorage.removeItem("firepwn-config")
+      localStorage.removeItem("firepwn-region")
+    } catch { /* noop */ }
+    output("Saved configuration cleared", "info")
+  }, [output])
+
+  // Auto-init from saved config on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("firepwn-config")
+      if (saved) {
+        const config = JSON.parse(saved)
+        if (config.apiKey) {
+          initFirebase(config)
+        }
+      }
+    } catch { /* noop */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const signIn = useCallback(
     (email: string, password: string) => {
@@ -755,6 +786,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         region,
         setRegion,
         initFirebase,
+        clearSavedConfig,
         output,
         clearLogs,
         signIn,

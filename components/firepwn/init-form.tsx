@@ -9,18 +9,35 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useFirebase } from "@/lib/firebase-context"
-import { Braces, Check, ChevronDown, Flame, TextCursorInput } from "lucide-react"
+import { Braces, Check, ChevronDown, Flame, TextCursorInput, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 
 export function InitForm() {
-  const { state, initFirebase } = useFirebase()
+  const { state, initFirebase, clearSavedConfig } = useFirebase()
   const [view, setView] = useState<"fields" | "json">("fields")
-  const [config, setConfig] = useState({
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    projectId: "",
-    storageBucket: "",
+  const [config, setConfig] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("firepwn-config")
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          return {
+            apiKey: parsed.apiKey || "",
+            authDomain: parsed.authDomain || "",
+            databaseURL: parsed.databaseURL || "",
+            projectId: parsed.projectId || "",
+            storageBucket: parsed.storageBucket || "",
+          }
+        }
+      } catch { /* noop */ }
+    }
+    return {
+      apiKey: "",
+      authDomain: "",
+      databaseURL: "",
+      projectId: "",
+      storageBucket: "",
+    }
   })
   const [jsonInput, setJsonInput] = useState("")
   const [jsonError, setJsonError] = useState("")
@@ -76,6 +93,21 @@ export function InitForm() {
                   <span className="flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
                     <Check className="h-3 w-3" /> Connected
                   </span>
+                )}
+                {state.initialized && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      clearSavedConfig()
+                    }}
+                    className="ml-auto h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-destructive"
+                    title="Forget saved config"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Forget
+                  </Button>
                 )}
               </div>
               <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
