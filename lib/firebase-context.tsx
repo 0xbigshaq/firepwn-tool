@@ -1,7 +1,6 @@
 "use client"
 
-import React, { createContext, useCallback, useContext, useRef, useState } from "react"
-
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
 
 export interface LogEntry {
   id: string
@@ -21,7 +20,10 @@ interface FirebaseState {
 interface FirebaseContextType {
   state: FirebaseState
   logs: LogEntry[]
-  initFirebase: (config: Record<string, string>) => void
+  region: string
+  setRegion: (region: string) => void
+  initFirebase: (config: Record<string, string>, regionOverride?: string) => void
+  clearSavedConfig: () => void
   output: (content: string, type?: "info" | "error" | "success") => void
   clearLogs: () => void
   signIn: (email: string, password: string) => void
@@ -81,7 +83,27 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   })
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [showMfaDialog, setShowMfaDialog] = useState(false)
+  const [region, setRegionState] = useState("us-central1")
   const nextAuthLogMessageRef = useRef<string | null>(null)
+  const initCalledRef = useRef(false)
+
+  const setRegion = useCallback((newRegion: string) => {
+    setRegionState(newRegion)
+    try {
+      localStorage.setItem("firepwn-region", newRegion)
+    } catch {
+      /* noop */
+    }
+    const w = window as any
+    const firebase = w.firebase
+    if (firebase && w.app) {
+      try {
+        w.functionsService = firebase.app().functions(newRegion)
+      } catch {
+        /* app not initialized yet */
+      }
+    }
+  }, [])
 
   const output = useCallback((content: string, type: "info" | "error" | "success" = "info") => {
     const time = new Date().toLocaleTimeString()
@@ -99,7 +121,8 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const initFirebase = useCallback(
-    (config: Record<string, string>) => {
+    (config: Record<string, string>, regionOverride?: string) => {
+      const effectiveRegion = regionOverride ?? region
       const w = window as any
       const firebase = w.firebase
 
@@ -120,16 +143,21 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
+        // Delete existing app if any to avoid duplicate-app errors
+        try {
+          w.app?.delete()
+        } catch {
+          /* noop */
+        }
         w.app = firebase.initializeApp(firebaseConfig)
       } catch (e: any) {
         output(`Error: ${e.message}`, "error")
-        try { w.app?.delete() } catch { /* noop */ }
         return
       }
 
       w.firestoreService = firebase.firestore()
       w.authService = firebase.auth()
-      w.functionsService = firebase.functions()
+      w.functionsService = firebase.app().functions(effectiveRegion)
 
       if (firebaseConfig.storageBucket) {
         w.storageService = firebase.storage()
@@ -154,28 +182,90 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         }
       })
 
-      setState((prev) => ({ ...prev, initialized: true, config: firebaseConfig }))
+      try {
+        localStorage.setItem("firepwn-config", JSON.stringify(firebaseConfig))
+      } catch {
+        /* noop */
+      }
+
+      setState((prev) => ({
+        ...prev,
+        initialized: true,
+        config: firebaseConfig,
+      }))
       output("Firebase initialized", "success")
     },
-    [output]
+    [output, region]
   )
+
+  const clearSavedConfig = useCallback(() => {
+    try {
+      localStorage.removeItem("firepwn-config")
+      localStorage.removeItem("firepwn-region")
+      localStorage.removeItem("firepwn-view")
+      localStorage.removeItem("firepwn-json-input")
+    } catch {
+      /* noop */
+    }
+    setRegionState("us-central1")
+    // Tear down existing Firebase app
+    const w = window as any
+    try {
+      w.app?.delete()
+    } catch {
+      /* noop */
+    }
+    w.app = null
+    w.firestoreService = null
+    w.authService = null
+    w.functionsService = null
+    w.storageService = null
+    setState({
+      initialized: false,
+      config: null,
+      authUser: null,
+      mfaResolver: null,
+      mfaVerificationId: null,
+    })
+    setLogs([])
+    output("Saved configuration cleared. You can now enter a new config.", "info")
+  }, [output])
+
+  // Auto-init from saved config on mount
+  useEffect(() => {
+    if (initCalledRef.current) return
+    try {
+      const savedRegion = localStorage.getItem("firepwn-region")
+      if (savedRegion) setRegionState(savedRegion)
+
+      const saved = localStorage.getItem("firepwn-config")
+      if (saved) {
+        const config = JSON.parse(saved)
+        if (config.apiKey) {
+          initCalledRef.current = true
+          initFirebase(config, savedRegion ?? undefined)
+        }
+      }
+    } catch {
+      /* noop */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const signIn = useCallback(
     (email: string, password: string) => {
       const w = window as any
       if (!w.authService) return
-      w.authService
-        .signInWithEmailAndPassword(email, password)
-        .catch((e: any) => {
-          if (e.code === "auth/multi-factor-auth-required") {
-            w.mfaResolver = e.resolver
-            setState((prev) => ({ ...prev, mfaResolver: e.resolver }))
-            setShowMfaDialog(true)
-            output("MFA Required: Please enter your verification code.", "info")
-          } else {
-            output(`Error: Firebase auth failed - ${e.message}`, "error")
-          }
-        })
+      w.authService.signInWithEmailAndPassword(email, password).catch((e: any) => {
+        if (e.code === "auth/multi-factor-auth-required") {
+          w.mfaResolver = e.resolver
+          setState((prev) => ({ ...prev, mfaResolver: e.resolver }))
+          setShowMfaDialog(true)
+          output("MFA Required: Please enter your verification code.", "info")
+        } else {
+          output(`Error: Firebase auth failed - ${e.message}`, "error")
+        }
+      })
     },
     [output]
   )
@@ -243,10 +333,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       const selectedHint = enrolledFactors[0]
       output(`MFA Verification: Attempting to verify ${selectedHint.factorId} code...`, "info")
 
-      if (
-        selectedHint.factorId === firebase.auth.PhoneAuthProvider.PROVIDER_ID ||
-        selectedHint.factorId === "phone"
-      ) {
+      if (selectedHint.factorId === firebase.auth.PhoneAuthProvider.PROVIDER_ID || selectedHint.factorId === "phone") {
         if (w.mfaVerificationId) {
           const credential = firebase.auth.PhoneAuthProvider.credential(w.mfaVerificationId, code)
           const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(credential)
@@ -286,10 +373,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             .verifyPhoneNumber(phoneInfoOptions, w.recaptchaVerifier)
             .then((verificationId: string) => {
               w.mfaVerificationId = verificationId
-              output(
-                `MFA SMS: Verification code sent to ${selectedHint.phoneNumber || "your phone"}. Please enter the 6-digit code.`,
-                "info"
-              )
+              output(`MFA SMS: Verification code sent to ${selectedHint.phoneNumber || "your phone"}. Please enter the 6-digit code.`, "info")
             })
             .catch((smsError: any) => {
               output(`MFA Error: Failed to send SMS - ${smsError.message}`, "error")
@@ -321,19 +405,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      const {
-        collectionName,
-        op,
-        docId,
-        jsonInput,
-        limit,
-        sortField,
-        sortDirection,
-        filterField,
-        filterOp: fOp,
-        filterValue,
-        mergeEnabled,
-      } = params
+      const { collectionName, op, docId, jsonInput, limit, sortField, sortDirection, filterField, filterOp: fOp, filterValue, mergeEnabled } = params
 
       // Validations
       if (sortField && ["set", "update", "delete"].includes(op)) {
@@ -389,10 +461,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                 .doc(docId)
                 .set(parsedJson, setOptions)
                 .then(() => {
-                  output(
-                    `Document ${operationType} (ID: ${docId}) ${mergeEnabled ? "(with merge: true)" : ""}\nResult: ${formatJsonOutput(parsedJson)}`,
-                    "success"
-                  )
+                  output(`Document ${operationType} (ID: ${docId}) ${mergeEnabled ? "(with merge: true)" : ""}\nResult: ${formatJsonOutput(parsedJson)}`, "success")
                 })
                 .catch((e: any) => output(`Error: ${e.message}`, "error"))
             } else {
@@ -434,10 +503,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                   output(`Document ${docId} not found`, "error")
                   return
                 }
-                output(
-                  `Getting ${docId} from ${collectionName}\nResponse:\n${formatJsonOutput(data)}`,
-                  "success"
-                )
+                output(`Getting ${docId} from ${collectionName}\nResponse:\n${formatJsonOutput(data)}`, "success")
               })
               .catch((e: any) => output(`Error: ${e.message}`, "error"))
           } else {
@@ -446,13 +512,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             if (filterField && fOp && filterValue) {
               let parsedFilterValue: any
               try {
-                if (
-                  filterValue.startsWith("[") ||
-                  filterValue.startsWith("{") ||
-                  filterValue === "true" ||
-                  filterValue === "false" ||
-                  !isNaN(Number(filterValue))
-                ) {
+                if (filterValue.startsWith("[") || filterValue.startsWith("{") || filterValue === "true" || filterValue === "false" || !isNaN(Number(filterValue))) {
                   parsedFilterValue = JSON.parse(filterValue)
                 } else {
                   parsedFilterValue = filterValue
@@ -561,24 +621,39 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   )
 
   const invokeHttpFunction = useCallback(
-    (funcName: string, args: Record<string, string>, method: "GET" | "POST") => {
+    async (funcName: string, args: Record<string, string>, method: "GET" | "POST") => {
       const projectId = state.config?.projectId
       if (!projectId) {
         output("Project ID not available", "error")
         return
       }
 
-      let url = `https://us-central1-${projectId}.cloudfunctions.net/${funcName}`
+      let url = `https://${region}-${projectId}.cloudfunctions.net/${funcName}`
 
+      const headers: Record<string, string> = {}
       const fetchOpts: RequestInit = { method }
+
+      // Attach auth token if user is logged in
+      const w = window as any
+      try {
+        const currentUser = w.authService?.currentUser
+        if (currentUser) {
+          const idToken = await currentUser.getIdToken()
+          headers["Authorization"] = `Bearer ${idToken}`
+        }
+      } catch {
+        /* proceed without auth */
+      }
 
       if (method === "GET" && args && Object.keys(args).length > 0) {
         const params = new URLSearchParams(args)
         url += `?${params.toString()}`
       } else if (method === "POST" && args) {
-        fetchOpts.headers = { "Content-Type": "application/json" }
+        headers["Content-Type"] = "application/json"
         fetchOpts.body = JSON.stringify(args)
       }
+
+      fetchOpts.headers = headers
 
       output(`${method} ${url}`, "info")
 
@@ -599,7 +674,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           }
         })
     },
-    [output, state.config]
+    [output, state.config, region]
   )
 
   const storageOp = useCallback(
@@ -662,10 +737,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
               (error: any) => output(`Upload error: ${error.message}`, "error"),
               () => {
                 uploadTask.snapshot.ref.getDownloadURL().then((downloadURL: string) => {
-                  output(
-                    `Upload successful!\nFile: ${path}\nSize: ${uploadTask.snapshot.totalBytes} bytes\nDownload URL: ${downloadURL}`,
-                    "success"
-                  )
+                  output(`Upload successful!\nFile: ${path}\nSize: ${uploadTask.snapshot.totalBytes} bytes\nDownload URL: ${downloadURL}`, "success")
                 })
               }
             )
@@ -738,7 +810,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       value={{
         state,
         logs,
+        region,
+        setRegion,
         initFirebase,
+        clearSavedConfig,
         output,
         clearLogs,
         signIn,

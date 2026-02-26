@@ -123,10 +123,7 @@ export function FirestoreExplorer() {
           {op === "get" && (
             <Collapsible open={showFilters} onOpenChange={setShowFilters}>
               <CollapsibleTrigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-                >
+                <button type="button" className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
                   <Filter className="h-3.5 w-3.5" />
                   {showFilters ? "Hide" : "Show"} Sort & Filter options
                 </button>
@@ -175,7 +172,7 @@ export function FirestoreExplorer() {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-xs text-muted-foreground">Filter Operator</Label>
-                    <Select value={filterOp} onValueChange={setFilterOp}>
+                    <Select value={filterOp || "none"} onValueChange={(v) => setFilterOp(v === "none" ? "" : v)}>
                       <SelectTrigger className="border-border bg-secondary text-foreground">
                         <SelectValue placeholder="No Filter" />
                       </SelectTrigger>
@@ -224,12 +221,7 @@ export function FirestoreExplorer() {
               />
               {op === "set" && (
                 <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={mergeEnabled}
-                    onChange={(e) => setMergeEnabled(e.target.checked)}
-                    className="rounded border-border"
-                  />
+                  <input type="checkbox" checked={mergeEnabled} onChange={(e) => setMergeEnabled(e.target.checked)} className="rounded border-border" />
                   Merge with existing document (instead of overwriting)
                 </label>
               )}

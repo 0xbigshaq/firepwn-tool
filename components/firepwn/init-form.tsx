@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useFirebase } from "@/lib/firebase-context"
-import { Braces, Check, ChevronDown, Flame, TextCursorInput } from "lucide-react"
+import { Braces, Check, ChevronDown, Flame, TextCursorInput, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 
 export function InitForm() {
-  const { state, initFirebase } = useFirebase()
+  const { state, initFirebase, clearSavedConfig } = useFirebase()
   const [view, setView] = useState<"fields" | "json">("fields")
   const [config, setConfig] = useState({
     apiKey: "",
@@ -26,12 +26,36 @@ export function InitForm() {
   const [jsonError, setJsonError] = useState("")
   const [open, setOpen] = useState(true)
 
+  // Hydrate from localStorage after mount to avoid SSR mismatch
+  useEffect(() => {
+    try {
+      const savedView = localStorage.getItem("firepwn-view")
+      if (savedView === "json" || savedView === "fields") setView(savedView)
+
+      const savedJson = localStorage.getItem("firepwn-json-input")
+      if (savedJson) setJsonInput(savedJson)
+
+      const savedConfig = localStorage.getItem("firepwn-config")
+      if (savedConfig) {
+        const parsed = JSON.parse(savedConfig)
+        setConfig({
+          apiKey: parsed.apiKey || "",
+          authDomain: parsed.authDomain || "",
+          databaseURL: parsed.databaseURL || "",
+          projectId: parsed.projectId || "",
+          storageBucket: parsed.storageBucket || "",
+        })
+      }
+    } catch { /* noop */ }
+  }, [])
+
   useEffect(() => {
     if (state.initialized) setOpen(false)
   }, [state.initialized])
 
   const handleFieldsSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    try { localStorage.setItem("firepwn-view", "fields") } catch { /* noop */ }
     initFirebase(config)
   }
 
@@ -49,6 +73,10 @@ export function InitForm() {
         setJsonError("Missing required field: apiKey")
         return
       }
+      try {
+        localStorage.setItem("firepwn-view", "json")
+        localStorage.setItem("firepwn-json-input", jsonInput)
+      } catch { /* noop */ }
       initFirebase(parsed)
     } catch {
       setJsonError("Invalid JSON. Paste a firebaseConfig object.")
@@ -67,20 +95,34 @@ export function InitForm() {
     <Collapsible open={open} onOpenChange={setOpen}>
       <Card className="border-border bg-card">
         <CardHeader>
-          <CollapsibleTrigger asChild>
-            <button type="button" className="flex w-full items-center justify-between text-left">
-              <div className="flex items-center gap-2">
-                <Flame className="h-5 w-5 text-primary" />
-                <CardTitle className="text-foreground">Initialize</CardTitle>
-                {state.initialized && (
-                  <span className="flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
-                    <Check className="h-3 w-3" /> Connected
-                  </span>
-                )}
-              </div>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
-            </button>
-          </CollapsibleTrigger>
+          <div className="flex w-full items-center justify-between">
+            <CollapsibleTrigger asChild>
+              <button type="button" className="flex flex-1 items-center justify-between text-left">
+                <div className="flex items-center gap-2">
+                  <Flame className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-foreground">Initialize</CardTitle>
+                  {state.initialized && (
+                    <span className="flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
+                      <Check className="h-3 w-3" /> Connected
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
+              </button>
+            </CollapsibleTrigger>
+            {state.initialized && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => clearSavedConfig()}
+                className="ml-2 h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-destructive"
+                title="Forget saved config"
+              >
+                <Trash2 className="h-3 w-3" />
+                Forget
+              </Button>
+            )}
+          </div>
           <CollapsibleContent>
             <CardDescription className="mt-2">
               Enter your{" "}
