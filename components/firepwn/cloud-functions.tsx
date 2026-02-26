@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useFirebase } from "@/lib/firebase-context"
 import { Cloud } from "lucide-react"
 import { Highlight, themes } from "prism-react-renderer"
@@ -14,8 +21,34 @@ import { useMemo, useState } from "react"
 type Mode = "callable" | "http"
 type HttpMethod = "GET" | "POST"
 
+const REGIONS = [
+  "us-central1",
+  "us-east1",
+  "us-east4",
+  "us-west1",
+  "us-west2",
+  "us-west3",
+  "us-west4",
+  "europe-west1",
+  "europe-west2",
+  "europe-west3",
+  "europe-west6",
+  "asia-east1",
+  "asia-east2",
+  "asia-northeast1",
+  "asia-northeast2",
+  "asia-northeast3",
+  "asia-south1",
+  "asia-southeast1",
+  "asia-southeast2",
+  "australia-southeast1",
+  "northamerica-northeast1",
+  "southamerica-east1",
+] as const
+
 export function CloudFunctions() {
-  const { state, region, setRegion, invokeCloudFunction, invokeHttpFunction } = useFirebase()
+  const { state, region, setRegion, invokeCloudFunction, invokeHttpFunction } =
+    useFirebase()
   const [cmd, setCmd] = useState("")
   const [mode, setMode] = useState<Mode>("callable")
   const [httpMethod, setHttpMethod] = useState<HttpMethod>("GET")
@@ -31,7 +64,9 @@ export function CloudFunctions() {
       const argsExpr = params.slice(1, -1).trim()
       let prettyArgs: string
       try {
-        prettyArgs = argsExpr ? JSON.stringify(JSON.parse(argsExpr), null, 2) : ""
+        prettyArgs = argsExpr
+          ? JSON.stringify(JSON.parse(argsExpr), null, 2)
+          : ""
       } catch {
         prettyArgs = argsExpr
       }
@@ -77,7 +112,9 @@ export function CloudFunctions() {
           // for GET, allow raw query string like "text=hello"
           if (httpMethod === "GET") {
             const params = new URLSearchParams(httpArgs)
-            params.forEach((v, k) => { args[k] = v })
+            params.forEach((v, k) => {
+              args[k] = v
+            })
           } else {
             return
           }
@@ -95,34 +132,18 @@ export function CloudFunctions() {
           <CardTitle className="text-foreground">Cloud Functions</CardTitle>
           <div className="ml-auto flex items-center gap-1.5">
             <Label className="text-xs text-muted-foreground">Region</Label>
-            <select
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="rounded-md border border-border bg-secondary px-2 py-1 text-xs text-foreground"
-            >
-              <option value="us-central1">us-central1</option>
-              <option value="us-east1">us-east1</option>
-              <option value="us-east4">us-east4</option>
-              <option value="us-west1">us-west1</option>
-              <option value="us-west2">us-west2</option>
-              <option value="us-west3">us-west3</option>
-              <option value="us-west4">us-west4</option>
-              <option value="europe-west1">europe-west1</option>
-              <option value="europe-west2">europe-west2</option>
-              <option value="europe-west3">europe-west3</option>
-              <option value="europe-west6">europe-west6</option>
-              <option value="asia-east1">asia-east1</option>
-              <option value="asia-east2">asia-east2</option>
-              <option value="asia-northeast1">asia-northeast1</option>
-              <option value="asia-northeast2">asia-northeast2</option>
-              <option value="asia-northeast3">asia-northeast3</option>
-              <option value="asia-south1">asia-south1</option>
-              <option value="asia-southeast1">asia-southeast1</option>
-              <option value="asia-southeast2">asia-southeast2</option>
-              <option value="australia-southeast1">australia-southeast1</option>
-              <option value="northamerica-northeast1">northamerica-northeast1</option>
-              <option value="southamerica-east1">southamerica-east1</option>
-            </select>
+            <Select value={region} onValueChange={setRegion}>
+              <SelectTrigger className="h-auto w-auto border-border bg-secondary px-2 py-1 text-xs text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {REGIONS.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {r}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardHeader>
@@ -131,20 +152,22 @@ export function CloudFunctions() {
           <button
             type="button"
             onClick={() => setMode("callable")}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${mode === "callable"
-              ? "bg-primary text-primary-foreground"
-              : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+              mode === "callable"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
+            }`}
           >
             Callable (on_call)
           </button>
           <button
             type="button"
             onClick={() => setMode("http")}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${mode === "http"
-              ? "bg-primary text-primary-foreground"
-              : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+              mode === "http"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
+            }`}
           >
             HTTP (on_request)
           </button>
@@ -152,14 +175,19 @@ export function CloudFunctions() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {mode === "callable" ? (
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="cloud-cmd" className="text-xs text-muted-foreground">
+              <Label
+                htmlFor="cloud-cmd"
+                className="text-xs text-muted-foreground"
+              >
                 Invoke a Cloud Function
               </Label>
               <Input
                 id="cloud-cmd"
                 type="text"
                 required
-                placeholder={'makeAdmin({ "email": "shaq@pwn.com", "isAdmin": true })'}
+                placeholder={
+                  'makeAdmin({ "email": "shaq@pwn.com", "isAdmin": true })'
+                }
                 value={cmd}
                 onChange={(e) => setCmd(e.target.value)}
                 className="border-border bg-secondary font-mono text-sm text-foreground"
@@ -172,18 +200,27 @@ export function CloudFunctions() {
             <div className="flex flex-col gap-3">
               <div className="flex gap-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs text-muted-foreground">Method</Label>
-                  <select
+                  <Label className="text-xs text-muted-foreground">
+                    Method
+                  </Label>
+                  <Select
                     value={httpMethod}
-                    onChange={(e) => setHttpMethod(e.target.value as HttpMethod)}
-                    className="rounded-md border border-border bg-secondary px-2 py-1.5 text-sm text-foreground"
+                    onValueChange={(v) => setHttpMethod(v as HttpMethod)}
                   >
-                    <option value="GET">GET</option>
-                    <option value="POST">POST</option>
-                  </select>
+                    <SelectTrigger className="w-[5.5rem] border-border bg-secondary text-sm text-foreground">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GET">GET</SelectItem>
+                      <SelectItem value="POST">POST</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex flex-1 flex-col gap-1.5">
-                  <Label htmlFor="http-func" className="text-xs text-muted-foreground">
+                  <Label
+                    htmlFor="http-func"
+                    className="text-xs text-muted-foreground"
+                  >
                     Function name
                   </Label>
                   <Input
@@ -198,8 +235,13 @@ export function CloudFunctions() {
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="http-args" className="text-xs text-muted-foreground">
-                  {httpMethod === "GET" ? "Query params (JSON)" : "Request body (JSON)"}
+                <Label
+                  htmlFor="http-args"
+                  className="text-xs text-muted-foreground"
+                >
+                  {httpMethod === "GET"
+                    ? "Query params (JSON)"
+                    : "Request body (JSON)"}
                 </Label>
                 <Input
                   id="http-args"
@@ -214,8 +256,14 @@ export function CloudFunctions() {
           )}
           {callPreview && (
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs text-muted-foreground">Call preview</Label>
-              <Highlight theme={themes.vsDark} code={callPreview} language="javascript">
+              <Label className="text-xs text-muted-foreground">
+                Call preview
+              </Label>
+              <Highlight
+                theme={themes.vsDark}
+                code={callPreview}
+                language="javascript"
+              >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
                   <pre
                     style={style}
@@ -234,7 +282,10 @@ export function CloudFunctions() {
             </div>
           )}
           <div>
-            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button
+              type="submit"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
               {mode === "callable" ? "Invoke" : `Send ${httpMethod}`}
             </Button>
           </div>
