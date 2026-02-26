@@ -187,8 +187,26 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.removeItem("firepwn-config")
       localStorage.removeItem("firepwn-region")
+      localStorage.removeItem("firepwn-view")
+      localStorage.removeItem("firepwn-json-input")
     } catch { /* noop */ }
-    output("Saved configuration cleared", "info")
+    // Tear down existing Firebase app
+    const w = window as any
+    try { w.app?.delete() } catch { /* noop */ }
+    w.app = null
+    w.firestoreService = null
+    w.authService = null
+    w.functionsService = null
+    w.storageService = null
+    setState({
+      initialized: false,
+      config: null,
+      authUser: null,
+      mfaResolver: null,
+      mfaVerificationId: null,
+    })
+    setLogs([])
+    output("Saved configuration cleared. You can now enter a new config.", "info")
   }, [output])
 
   // Auto-init from saved config on mount

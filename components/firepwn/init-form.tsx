@@ -14,7 +14,13 @@ import { useEffect, useState } from "react"
 
 export function InitForm() {
   const { state, initFirebase, clearSavedConfig } = useFirebase()
-  const [view, setView] = useState<"fields" | "json">("fields")
+  const [view, setView] = useState<"fields" | "json">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("firepwn-view")
+      if (saved === "json" || saved === "fields") return saved
+    }
+    return "fields"
+  })
   const [config, setConfig] = useState(() => {
     if (typeof window !== "undefined") {
       try {
@@ -39,7 +45,12 @@ export function InitForm() {
       storageBucket: "",
     }
   })
-  const [jsonInput, setJsonInput] = useState("")
+  const [jsonInput, setJsonInput] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("firepwn-json-input") || ""
+    }
+    return ""
+  })
   const [jsonError, setJsonError] = useState("")
   const [open, setOpen] = useState(true)
 
@@ -49,6 +60,7 @@ export function InitForm() {
 
   const handleFieldsSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    try { localStorage.setItem("firepwn-view", "fields") } catch { /* noop */ }
     initFirebase(config)
   }
 
@@ -66,6 +78,10 @@ export function InitForm() {
         setJsonError("Missing required field: apiKey")
         return
       }
+      try {
+        localStorage.setItem("firepwn-view", "json")
+        localStorage.setItem("firepwn-json-input", jsonInput)
+      } catch { /* noop */ }
       initFirebase(parsed)
     } catch {
       setJsonError("Invalid JSON. Paste a firebaseConfig object.")
@@ -84,35 +100,34 @@ export function InitForm() {
     <Collapsible open={open} onOpenChange={setOpen}>
       <Card className="border-border bg-card">
         <CardHeader>
-          <CollapsibleTrigger asChild>
-            <button type="button" className="flex w-full items-center justify-between text-left">
-              <div className="flex items-center gap-2">
-                <Flame className="h-5 w-5 text-primary" />
-                <CardTitle className="text-foreground">Initialize</CardTitle>
-                {state.initialized && (
-                  <span className="flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
-                    <Check className="h-3 w-3" /> Connected
-                  </span>
-                )}
-                {state.initialized && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      clearSavedConfig()
-                    }}
-                    className="ml-auto h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-destructive"
-                    title="Forget saved config"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    Forget
-                  </Button>
-                )}
-              </div>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
-            </button>
-          </CollapsibleTrigger>
+          <div className="flex w-full items-center justify-between">
+            <CollapsibleTrigger asChild>
+              <button type="button" className="flex flex-1 items-center justify-between text-left">
+                <div className="flex items-center gap-2">
+                  <Flame className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-foreground">Initialize</CardTitle>
+                  {state.initialized && (
+                    <span className="flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
+                      <Check className="h-3 w-3" /> Connected
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
+              </button>
+            </CollapsibleTrigger>
+            {state.initialized && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => clearSavedConfig()}
+                className="ml-2 h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-destructive"
+                title="Forget saved config"
+              >
+                <Trash2 className="h-3 w-3" />
+                Forget
+              </Button>
+            )}
+          </div>
           <CollapsibleContent>
             <CardDescription className="mt-2">
               Enter your{" "}
