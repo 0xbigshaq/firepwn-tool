@@ -511,28 +511,37 @@ export function Autopwn() {
             <CollapsibleContent className="mt-2">
               <ScrollArea className="h-[300px] rounded-md border border-border">
                 <div className="divide-y divide-border">
-                  {results.map((r) => (
-                    <div key={r.name} className="flex items-center justify-between px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        {r.readAccess === "allowed" && r.docCount > 0 ? (
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
-                        ) : (
-                          <AlertTriangle className="h-4 w-4 shrink-0 text-yellow-500" />
-                        )}
-                        <span className="font-mono text-sm text-foreground">{r.name}</span>
-                        {r.docCount > 0 && (
-                          <span className="text-xs text-muted-foreground">
-                            ({r.docCount} doc{r.docCount !== 1 ? "s" : ""})
-                          </span>
-                        )}
+                  {[...results]
+                    .sort((a, b) => {
+                      // Readable with docs first, then by doc count desc, then alphabetical
+                      const aScore = a.readAccess === "allowed" && a.docCount > 0 ? 1 : 0
+                      const bScore = b.readAccess === "allowed" && b.docCount > 0 ? 1 : 0
+                      if (bScore !== aScore) return bScore - aScore
+                      if (b.docCount !== a.docCount) return b.docCount - a.docCount
+                      return a.name.localeCompare(b.name)
+                    })
+                    .map((r) => (
+                      <div key={r.name} className="flex items-center justify-between px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          {r.readAccess === "allowed" && r.docCount > 0 ? (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+                          ) : (
+                            <AlertTriangle className="h-4 w-4 shrink-0 text-yellow-500" />
+                          )}
+                          <span className="font-mono text-sm text-foreground">{r.name}</span>
+                          {r.docCount > 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              ({r.docCount} doc{r.docCount !== 1 ? "s" : ""})
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <PermissionBadge label="R" status={r.readAccess} />
+                          <PermissionBadge label="W" status={r.writeAccess} />
+                          <PermissionBadge label="D" status={r.deleteAccess} />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <PermissionBadge label="R" status={r.readAccess} />
-                        <PermissionBadge label="W" status={r.writeAccess} />
-                        <PermissionBadge label="D" status={r.deleteAccess} />
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </ScrollArea>
             </CollapsibleContent>
