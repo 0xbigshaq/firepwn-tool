@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFirebase } from "@/lib/firebase-context"
-import { Copy, KeyRound, LogOut, ShieldCheck } from "lucide-react"
+import { Copy, KeyRound, LogOut, ShieldCheck, UserX } from "lucide-react"
 import { useState } from "react"
 
 function MfaDialog() {
@@ -30,18 +30,10 @@ function MfaDialog() {
         className="border-border bg-secondary font-mono text-foreground"
       />
       <div className="flex gap-2">
-        <Button
-          size="sm"
-          onClick={() => verifyMfaCode(code)}
-          className="bg-success text-success-foreground hover:bg-success/90"
-        >
+        <Button size="sm" onClick={() => verifyMfaCode(code)} className="bg-success text-success-foreground hover:bg-success/90">
           Verify
         </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={cancelMfa}
-        >
+        <Button size="sm" variant="destructive" onClick={cancelMfa}>
           Cancel
         </Button>
       </div>
@@ -52,7 +44,7 @@ function MfaDialog() {
 }
 
 export function AuthPanel() {
-  const { state, signIn, signUp, signOut, googleOAuth, showMfaDialog } = useFirebase()
+  const { state, signIn, signUp, signInAnonymously, signOut, googleOAuth, showMfaDialog } = useFirebase()
   const [loginEmail, setLoginEmail] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
   const [signupEmail, setSignupEmail] = useState("")
@@ -61,7 +53,7 @@ export function AuthPanel() {
 
   const handleCopyUid = () => {
     if (!state.authUser?.uid) return
-    navigator.clipboard.writeText(state.authUser.uid).catch(() => { })
+    navigator.clipboard.writeText(state.authUser.uid).catch(() => {})
   }
 
   if (!state.initialized) return null
@@ -79,29 +71,17 @@ export function AuthPanel() {
           <div className="flex flex-col gap-3">
             <div className="rounded-md border border-border bg-secondary p-3">
               <p className="text-sm text-foreground">
-                Logged in as{" "}
-                <span className="font-medium text-primary">{state.authUser.email || "(no email)"}</span>
+                Logged in as <span className="font-medium text-primary">{state.authUser.email || "(no email)"}</span>
               </p>
               <div className="mt-1.5 flex items-center gap-1.5">
                 <span className="text-xs text-muted-foreground">UID:</span>
-                <code className="max-w-[180px] truncate font-mono text-xs text-muted-foreground">
-                  {state.authUser.uid}
-                </code>
-                <button
-                  type="button"
-                  onClick={handleCopyUid}
-                  aria-label="Copy user UID"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
+                <code className="max-w-[180px] truncate font-mono text-xs text-muted-foreground">{state.authUser.uid}</code>
+                <button type="button" onClick={handleCopyUid} aria-label="Copy user UID" className="text-muted-foreground transition-colors hover:text-foreground">
                   <Copy className="h-3 w-3" />
                 </button>
               </div>
             </div>
-            <Button
-              onClick={signOut}
-              size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
+            <Button onClick={signOut} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
               <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sign out
             </Button>
           </div>
@@ -119,6 +99,9 @@ export function AuthPanel() {
               <TabsTrigger value="oauth" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 OAuth
               </TabsTrigger>
+              <TabsTrigger value="anon" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Anon
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <form
@@ -129,7 +112,9 @@ export function AuthPanel() {
                 className="flex flex-col gap-3"
               >
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="login-email" className="text-xs text-muted-foreground">Email</Label>
+                  <Label htmlFor="login-email" className="text-xs text-muted-foreground">
+                    Email
+                  </Label>
                   <Input
                     id="login-email"
                     type="text"
@@ -141,7 +126,9 @@ export function AuthPanel() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="login-pw" className="text-xs text-muted-foreground">Password</Label>
+                  <Label htmlFor="login-pw" className="text-xs text-muted-foreground">
+                    Password
+                  </Label>
                   <Input
                     id="login-pw"
                     type="password"
@@ -166,7 +153,9 @@ export function AuthPanel() {
                 className="flex flex-col gap-3"
               >
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="signup-email" className="text-xs text-muted-foreground">Email</Label>
+                  <Label htmlFor="signup-email" className="text-xs text-muted-foreground">
+                    Email
+                  </Label>
                   <Input
                     id="signup-email"
                     type="text"
@@ -178,7 +167,9 @@ export function AuthPanel() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="signup-pw" className="text-xs text-muted-foreground">Password</Label>
+                  <Label htmlFor="signup-pw" className="text-xs text-muted-foreground">
+                    Password
+                  </Label>
                   <Input
                     id="signup-pw"
                     type="password"
@@ -203,9 +194,7 @@ export function AuthPanel() {
                 }}
                 className="flex flex-col gap-3"
               >
-                <p className="text-xs text-muted-foreground">
-                  Paste an OAuth ID token captured from your app&apos;s Google sign-in flow.
-                </p>
+                <p className="text-xs text-muted-foreground">Paste an OAuth ID token captured from your app&apos;s Google sign-in flow.</p>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="oauth-token" className="text-xs text-muted-foreground">
                     oauthIdToken
@@ -224,6 +213,15 @@ export function AuthPanel() {
                   Authenticate
                 </Button>
               </form>
+            </TabsContent>
+            <TabsContent value="anon">
+              <div className="flex flex-col gap-3">
+                <p className="text-xs text-muted-foreground">Sign in anonymously to test rules that allow unauthenticated or anonymous users.</p>
+                <Button size="sm" onClick={signInAnonymously} className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                  <UserX className="h-3.5 w-3.5" />
+                  Sign in Anonymously
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
         )}

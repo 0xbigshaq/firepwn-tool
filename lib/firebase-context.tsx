@@ -28,6 +28,7 @@ interface FirebaseContextType {
   clearLogs: () => void
   signIn: (email: string, password: string) => void
   signUp: (email: string, password: string) => void
+  signInAnonymously: () => void
   signOut: () => void
   googleOAuth: (idToken: string) => void
   showMfaDialog: boolean
@@ -293,6 +294,20 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       .signOut()
       .then(() => output("Logged out", "info"))
       .catch((e: any) => output(`Failed to sign out: ${e.message}`, "error"))
+  }, [output])
+
+  const signInAnonymously = useCallback(() => {
+    const w = window as any
+    if (!w.authService) return
+    nextAuthLogMessageRef.current = "Signed in anonymously"
+    w.authService.signInAnonymously().catch((e: any) => {
+      nextAuthLogMessageRef.current = null
+      if (e.code === "auth/operation-not-allowed") {
+        output("Anonymous auth is not enabled for this project", "error")
+      } else {
+        output(`Error: ${e.message}`, "error")
+      }
+    })
   }, [output])
 
   const googleOAuth = useCallback(
@@ -818,6 +833,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         clearLogs,
         signIn,
         signUp,
+        signInAnonymously,
         signOut: signOutFn,
         googleOAuth,
         showMfaDialog,
