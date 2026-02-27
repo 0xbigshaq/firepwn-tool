@@ -1,7 +1,5 @@
 "use client"
 
-import React from "react"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Crosshair, ShieldAlert, ChevronDown, Loader2, CheckCircle2, AlertTriangle } from "lucide-react"
+import { Crosshair, ChevronDown, Loader2, CheckCircle2, AlertTriangle } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 
 const COMMON_COLLECTIONS = [
@@ -158,7 +156,6 @@ type PermissionStatus = "allowed" | "denied" | "unknown"
 
 interface CollectionResult {
   name: string
-  exists: boolean
   docCount: number
   readAccess: PermissionStatus
   writeAccess: PermissionStatus
@@ -181,11 +178,12 @@ export function Autopwn() {
   const [expandedResults, setExpandedResults] = useState(false)
   const abortRef = useRef(false)
   const [concurrency, setConcurrency] = useState("10")
+  const [scanMode, setScanMode] = useState<"all" | "custom">("all")
 
   const isRunning = phase !== "idle" && phase !== "done"
 
   const getCollectionsToScan = useCallback((): string[] => {
-    const collections: string[] = [...COMMON_COLLECTIONS]
+    const collections: string[] = scanMode === "all" ? [...COMMON_COLLECTIONS] : []
     if (customCollections.trim()) {
       const custom = customCollections
         .split(/[,\n]/)
@@ -196,7 +194,7 @@ export function Autopwn() {
     }
     // Deduplicate
     return [...new Set(collections)]
-  }, [customCollections])
+  }, [customCollections, scanMode])
 
   const runScan = useCallback(async () => {
     const w = window as any
@@ -228,7 +226,6 @@ export function Autopwn() {
 
         return {
           name,
-          exists: docCount > 0,
           docCount,
           readAccess: "allowed",
           writeAccess: "unknown",
@@ -315,8 +312,6 @@ export function Autopwn() {
         setResults((prev) => prev.map((existing) => (existing.name === r.name ? { ...r } : existing)))
         setProgress(Math.round(((i + 1) / found.length) * 100))
       }
-
-      setPhase("testing-write")
     }
 
     // Build summary
@@ -382,7 +377,7 @@ export function Autopwn() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {/* Configuration */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="scan-limit" className="text-xs text-muted-foreground">
               Docs per collection
@@ -421,6 +416,18 @@ export function Autopwn() {
               <SelectContent>
                 <SelectItem value="yes">Enabled</SelectItem>
                 <SelectItem value="no">Discovery only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-xs text-muted-foreground">Scan mode</Label>
+            <Select value={scanMode} onValueChange={(v) => setScanMode(v as "all" | "custom")} disabled={isRunning}>
+              <SelectTrigger className="border-border bg-secondary text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Built-in + custom</SelectItem>
+                <SelectItem value="custom">Custom only</SelectItem>
               </SelectContent>
             </Select>
           </div>
