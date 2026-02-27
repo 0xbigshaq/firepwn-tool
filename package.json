@@ -1,12 +1,14 @@
 {
-  "name": "my-project",
-  "version": "0.1.0",
+  "name": "firepwn-tool",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "format": "biome format --write ."
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -61,6 +63,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.4",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^22",
     "@types/react": "^19",
