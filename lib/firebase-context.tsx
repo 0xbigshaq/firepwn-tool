@@ -1,6 +1,7 @@
 "use client"
 
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
+import type React from "react"
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
 
 export interface LogEntry {
   id: string
@@ -37,7 +38,11 @@ interface FirebaseContextType {
   cancelMfa: () => void
   firestoreOp: (params: FirestoreParams) => void
   invokeCloudFunction: (cmd: string) => void
-  invokeHttpFunction: (funcName: string, args: Record<string, string>, method: "GET" | "POST") => void
+  invokeHttpFunction: (
+    funcName: string,
+    args: Record<string, string>,
+    method: "GET" | "POST",
+  ) => void
   storageOp: (params: StorageParams) => void
 }
 
@@ -162,7 +167,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
       if (firebaseConfig.storageBucket) {
         w.storageService = firebase.storage()
-        output(`Storage service initialized with bucket: ${firebaseConfig.storageBucket}`, "success")
+        output(
+          `Storage service initialized with bucket: ${firebaseConfig.storageBucket}`,
+          "success",
+        )
       } else {
         output("Storage service not initialized (no storageBucket provided)", "info")
       }
@@ -196,7 +204,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       }))
       output("Firebase initialized", "success")
     },
-    [output, region]
+    [output, region],
   )
 
   const clearSavedConfig = useCallback(() => {
@@ -233,6 +241,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   }, [output])
 
   // Auto-init from saved config on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount only
   useEffect(() => {
     if (initCalledRef.current) return
     try {
@@ -250,7 +259,6 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     } catch {
       /* noop */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const signIn = useCallback(
@@ -268,7 +276,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         }
       })
     },
-    [output]
+    [output],
   )
 
   const signUp = useCallback(
@@ -284,7 +292,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           output(`Error: ${e.message}`, "error")
         })
     },
-    [output]
+    [output],
   )
 
   const signOutFn = useCallback(() => {
@@ -326,7 +334,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         output(`Error: ${e.message}`, "error")
       }
     },
-    [output]
+    [output],
   )
 
   const verifyMfaCode = useCallback(
@@ -348,7 +356,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       const selectedHint = enrolledFactors[0]
       output(`MFA Verification: Attempting to verify ${selectedHint.factorId} code...`, "info")
 
-      if (selectedHint.factorId === firebase.auth.PhoneAuthProvider.PROVIDER_ID || selectedHint.factorId === "phone") {
+      if (
+        selectedHint.factorId === firebase.auth.PhoneAuthProvider.PROVIDER_ID ||
+        selectedHint.factorId === "phone"
+      ) {
         if (w.mfaVerificationId) {
           const credential = firebase.auth.PhoneAuthProvider.credential(w.mfaVerificationId, code)
           const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(credential)
@@ -388,7 +399,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             .verifyPhoneNumber(phoneInfoOptions, w.recaptchaVerifier)
             .then((verificationId: string) => {
               w.mfaVerificationId = verificationId
-              output(`MFA SMS: Verification code sent to ${selectedHint.phoneNumber || "your phone"}. Please enter the 6-digit code.`, "info")
+              output(
+                `MFA SMS: Verification code sent to ${selectedHint.phoneNumber || "your phone"}. Please enter the 6-digit code.`,
+                "info",
+              )
             })
             .catch((smsError: any) => {
               output(`MFA Error: Failed to send SMS - ${smsError.message}`, "error")
@@ -402,7 +416,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         output(`Unsupported MFA factor type: ${selectedHint.factorId}`, "error")
       }
     },
-    [output]
+    [output],
   )
 
   const cancelMfa = useCallback(() => {
@@ -420,7 +434,19 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      const { collectionName, op, docId, jsonInput, limit, sortField, sortDirection, filterField, filterOp: fOp, filterValue, mergeEnabled } = params
+      const {
+        collectionName,
+        op,
+        docId,
+        jsonInput,
+        limit,
+        sortField,
+        sortDirection,
+        filterField,
+        filterOp: fOp,
+        filterValue,
+        mergeEnabled,
+      } = params
 
       // Validations
       if (sortField && ["set", "update", "delete"].includes(op)) {
@@ -476,7 +502,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                 .doc(docId)
                 .set(parsedJson, setOptions)
                 .then(() => {
-                  output(`Document ${operationType} (ID: ${docId}) ${mergeEnabled ? "(with merge: true)" : ""}\nResult: ${formatJsonOutput(parsedJson)}`, "success")
+                  output(
+                    `Document ${operationType} (ID: ${docId}) ${mergeEnabled ? "(with merge: true)" : ""}\nResult: ${formatJsonOutput(parsedJson)}`,
+                    "success",
+                  )
                 })
                 .catch((e: any) => output(`Error: ${e.message}`, "error"))
             } else {
@@ -501,7 +530,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             .doc(docId)
             .update(parsedJson)
             .then(() => {
-              output(`Updated fields (Doc ID: ${docId})\n${formatJsonOutput(parsedJson)}`, "success")
+              output(
+                `Updated fields (Doc ID: ${docId})\n${formatJsonOutput(parsedJson)}`,
+                "success",
+              )
             })
             .catch((e: any) => output(`Error: ${e.message}`, "error"))
         }
@@ -518,7 +550,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                   output(`Document ${docId} not found`, "error")
                   return
                 }
-                output(`Getting ${docId} from ${collectionName}\nResponse:\n${formatJsonOutput(data)}`, "success")
+                output(
+                  `Getting ${docId} from ${collectionName}\nResponse:\n${formatJsonOutput(data)}`,
+                  "success",
+                )
               })
               .catch((e: any) => output(`Error: ${e.message}`, "error"))
           } else {
@@ -527,7 +562,13 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             if (filterField && fOp && filterValue) {
               let parsedFilterValue: any
               try {
-                if (filterValue.startsWith("[") || filterValue.startsWith("{") || filterValue === "true" || filterValue === "false" || !isNaN(Number(filterValue))) {
+                if (
+                  filterValue.startsWith("[") ||
+                  filterValue.startsWith("{") ||
+                  filterValue === "true" ||
+                  filterValue === "false" ||
+                  !Number.isNaN(Number(filterValue))
+                ) {
                   parsedFilterValue = JSON.parse(filterValue)
                 } else {
                   parsedFilterValue = filterValue
@@ -550,7 +591,9 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
               .get()
               .then((snapshots: any) => {
                 const safeCollection = collectionName
-                const filterInfo = filterField ? ` (filtered by ${filterField} ${fOp} ${filterValue})` : ""
+                const filterInfo = filterField
+                  ? ` (filtered by ${filterField} ${fOp} ${filterValue})`
+                  : ""
                 const sortInfo = sortField ? ` (sorted by ${sortField} ${sortDirection})` : ""
                 const limitInfo = limit ? ` (limit: ${limit})` : " (no limit)"
                 let result = `Getting documents from ${safeCollection}${limitInfo}${filterInfo}${sortInfo}\nResponse (${snapshots.docs.length} documents):\n`
@@ -590,7 +633,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           .catch((e: any) => output(`Error: ${e.message}`, "error"))
       }
     },
-    [output]
+    [output],
   )
 
   const invokeCloudFunction = useCallback(
@@ -632,7 +675,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           output(`Error: ${msg}`, "error")
         })
     },
-    [output]
+    [output],
   )
 
   const invokeHttpFunction = useCallback(
@@ -654,7 +697,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         const currentUser = w.authService?.currentUser
         if (currentUser) {
           const idToken = await currentUser.getIdToken()
-          headers["Authorization"] = `Bearer ${idToken}`
+          headers.Authorization = `Bearer ${idToken}`
         }
       } catch {
         /* proceed without auth */
@@ -683,20 +726,26 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         })
         .catch((e: any) => {
           if (e instanceof TypeError && e.message === "Failed to fetch") {
-            output("CORS Error: try running Chrome with `--disable-web-security` or change your CORS policy in the backend", "error")
+            output(
+              "CORS Error: try running Chrome with `--disable-web-security` or change your CORS policy in the backend",
+              "error",
+            )
           } else {
             output(`Error: ${e.message}`, "error")
           }
         })
     },
-    [output, state.config, region]
+    [output, state.config, region],
   )
 
   const storageOp = useCallback(
     (params: StorageParams) => {
       const w = window as any
       if (!w.storageService) {
-        output("Storage service not initialized. Please provide a storageBucket in configuration.", "error")
+        output(
+          "Storage service not initialized. Please provide a storageBucket in configuration.",
+          "error",
+        )
         return
       }
 
@@ -752,9 +801,12 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
               (error: any) => output(`Upload error: ${error.message}`, "error"),
               () => {
                 uploadTask.snapshot.ref.getDownloadURL().then((downloadURL: string) => {
-                  output(`Upload successful!\nFile: ${path}\nSize: ${uploadTask.snapshot.totalBytes} bytes\nDownload URL: ${downloadURL}`, "success")
+                  output(
+                    `Upload successful!\nFile: ${path}\nSize: ${uploadTask.snapshot.totalBytes} bytes\nDownload URL: ${downloadURL}`,
+                    "success",
+                  )
                 })
-              }
+              },
             )
           } catch (error: any) {
             output(`Error: ${error.message}`, "error")
@@ -817,7 +869,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           output("Invalid storage operation", "error")
       }
     },
-    [output]
+    [output],
   )
 
   return (

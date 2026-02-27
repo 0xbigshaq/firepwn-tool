@@ -1,16 +1,21 @@
 "use client"
 
-import React from "react"
-
+import { Database, Filter } from "lucide-react"
+import type React from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useFirebase } from "@/lib/firebase-context"
-import { Database, Filter } from "lucide-react"
-import { useState } from "react"
 
 export function FirestoreExplorer() {
   const { state, firestoreOp } = useFirebase()
@@ -36,7 +41,7 @@ export function FirestoreExplorer() {
       op,
       docId,
       jsonInput,
-      limit: parseInt(limit) || 100,
+      limit: parseInt(limit, 10) || 100,
       sortField,
       sortDirection,
       filterField,
@@ -123,7 +128,10 @@ export function FirestoreExplorer() {
           {op === "get" && (
             <Collapsible open={showFilters} onOpenChange={setShowFilters}>
               <CollapsibleTrigger asChild>
-                <button type="button" className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
                   <Filter className="h-3.5 w-3.5" />
                   {showFilters ? "Hide" : "Show"} Sort & Filter options
                 </button>
@@ -172,7 +180,10 @@ export function FirestoreExplorer() {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-xs text-muted-foreground">Filter Operator</Label>
-                    <Select value={filterOp || "none"} onValueChange={(v) => setFilterOp(v === "none" ? "" : v)}>
+                    <Select
+                      value={filterOp || "none"}
+                      onValueChange={(v) => setFilterOp(v === "none" ? "" : v)}
+                    >
                       <SelectTrigger className="border-border bg-secondary text-foreground">
                         <SelectValue placeholder="No Filter" />
                       </SelectTrigger>
@@ -221,7 +232,12 @@ export function FirestoreExplorer() {
               />
               {op === "set" && (
                 <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <input type="checkbox" checked={mergeEnabled} onChange={(e) => setMergeEnabled(e.target.checked)} className="rounded border-border" />
+                  <input
+                    type="checkbox"
+                    checked={mergeEnabled}
+                    onChange={(e) => setMergeEnabled(e.target.checked)}
+                    className="rounded border-border"
+                  />
                   Merge with existing document (instead of overwriting)
                 </label>
               )}
@@ -229,7 +245,10 @@ export function FirestoreExplorer() {
           )}
 
           <div>
-            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button
+              type="submit"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
               Execute
             </Button>
           </div>

@@ -1,7 +1,8 @@
 "use client"
 
-import React from "react"
-
+import { Braces, Check, ChevronDown, Flame, TextCursorInput, Trash2 } from "lucide-react"
+import type React from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -9,8 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useFirebase } from "@/lib/firebase-context"
-import { Braces, Check, ChevronDown, Flame, TextCursorInput, Trash2 } from "lucide-react"
-import { useEffect, useState } from "react"
 
 export function InitForm() {
   const { state, initFirebase, clearSavedConfig } = useFirebase()
@@ -46,7 +45,9 @@ export function InitForm() {
           storageBucket: parsed.storageBucket || "",
         })
       }
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   }, [])
 
   useEffect(() => {
@@ -55,7 +56,11 @@ export function InitForm() {
 
   const handleFieldsSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    try { localStorage.setItem("firepwn-view", "fields") } catch { /* noop */ }
+    try {
+      localStorage.setItem("firepwn-view", "fields")
+    } catch {
+      /* noop */
+    }
     initFirebase(config)
   }
 
@@ -76,7 +81,9 @@ export function InitForm() {
       try {
         localStorage.setItem("firepwn-view", "json")
         localStorage.setItem("firepwn-json-input", jsonInput)
-      } catch { /* noop */ }
+      } catch {
+        /* noop */
+      }
       initFirebase(parsed)
     } catch {
       setJsonError("Invalid JSON. Paste a firebaseConfig object.")
@@ -85,10 +92,25 @@ export function InitForm() {
 
   const fields = [
     { key: "apiKey", label: "API Key", required: true, placeholder: "AIzaSy..." },
-    { key: "authDomain", label: "Auth Domain", required: true, placeholder: "your-project.firebaseapp.com" },
-    { key: "databaseURL", label: "Database URL", required: true, placeholder: "https://your-project.firebaseio.com" },
+    {
+      key: "authDomain",
+      label: "Auth Domain",
+      required: true,
+      placeholder: "your-project.firebaseapp.com",
+    },
+    {
+      key: "databaseURL",
+      label: "Database URL",
+      required: true,
+      placeholder: "https://your-project.firebaseio.com",
+    },
     { key: "projectId", label: "Project ID", required: true, placeholder: "your-project-id" },
-    { key: "storageBucket", label: "Storage Bucket (optional)", required: false, placeholder: "your-bucket.appspot.com" },
+    {
+      key: "storageBucket",
+      label: "Storage Bucket (optional)",
+      required: false,
+      placeholder: "your-bucket.appspot.com",
+    },
   ] as const
 
   return (
@@ -107,7 +129,9 @@ export function InitForm() {
                     </span>
                   )}
                 </div>
-                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`}
+                />
               </button>
             </CollapsibleTrigger>
             {state.initialized && (
@@ -177,7 +201,9 @@ export function InitForm() {
                         disabled={state.initialized}
                         placeholder={field.placeholder}
                         value={config[field.key]}
-                        onChange={(e) => setConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                        onChange={(e) =>
+                          setConfig((prev) => ({ ...prev, [field.key]: e.target.value }))
+                        }
                         className="border-border bg-secondary text-foreground placeholder:text-muted-foreground"
                       />
                     </div>
@@ -213,7 +239,9 @@ export function InitForm() {
                     id="json-config"
                     rows={8}
                     disabled={state.initialized}
-                    placeholder={'{\n  apiKey: "AIzaSy...",\n  authDomain: "your-project.firebaseapp.com",\n  projectId: "your-project-id",\n  storageBucket: "your-bucket.appspot.com"\n}'}
+                    placeholder={
+                      '{\n  apiKey: "AIzaSy...",\n  authDomain: "your-project.firebaseapp.com",\n  projectId: "your-project-id",\n  storageBucket: "your-bucket.appspot.com"\n}'
+                    }
                     value={jsonInput}
                     onChange={(e) => {
                       setJsonInput(e.target.value)
@@ -221,9 +249,7 @@ export function InitForm() {
                     }}
                     className="border-border bg-secondary font-mono text-sm text-foreground placeholder:text-muted-foreground"
                   />
-                  {jsonError && (
-                    <p className="text-xs text-destructive">{jsonError}</p>
-                  )}
+                  {jsonError && <p className="text-xs text-destructive">{jsonError}</p>}
                 </div>
                 <div>
                   <Button

@@ -1,11 +1,11 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { useFirebase } from "@/lib/firebase-context"
-import { cn } from "@/lib/utils"
 import { ArrowDownUp, PanelBottom, PanelRight, Terminal, Trash2 } from "lucide-react"
 import { Highlight, themes } from "prism-react-renderer"
 import { useEffect, useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { useFirebase } from "@/lib/firebase-context"
+import { cn } from "@/lib/utils"
 
 function parseJsonParts(content: string): { text: string; isJson: boolean }[] {
   const parts: { text: string; isJson: boolean }[] = []
@@ -31,14 +31,26 @@ function parseJsonParts(content: string): { text: string; isJson: boolean }[] {
 
     for (let j = 0; j < remaining.length; j++) {
       const c = remaining[j]
-      if (esc) { esc = false; continue }
-      if (c === "\\" && inStr) { esc = true; continue }
-      if (c === '"') { inStr = !inStr; continue }
+      if (esc) {
+        esc = false
+        continue
+      }
+      if (c === "\\" && inStr) {
+        esc = true
+        continue
+      }
+      if (c === '"') {
+        inStr = !inStr
+        continue
+      }
       if (inStr) continue
       if (c === "{" || c === "[") depth++
       if (c === "}" || c === "]") {
         depth--
-        if (depth === 0) { endIdx = j; break }
+        if (depth === 0) {
+          endIdx = j
+          break
+        }
       }
     }
 
@@ -74,12 +86,18 @@ function Linkify({ text }: { text: string }) {
     <>
       {parts.map((part, i) =>
         urlRegex.test(part) ? (
-          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline hover:text-primary/80"
+          >
             {part}
           </a>
         ) : (
           part
-        )
+        ),
       )}
     </>
   )
@@ -123,7 +141,7 @@ function LogContent({ content }: { content: string }) {
           >
             <Linkify text={part.text} />
           </pre>
-        )
+        ),
       )}
     </div>
   )
@@ -139,6 +157,7 @@ export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [newestFirst, setNewestFirst] = useState(true)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on new log entries
   useEffect(() => {
     const el = scrollRef.current
     if (el) {
@@ -151,7 +170,12 @@ export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
   }, [logs, newestFirst])
 
   return (
-    <div className={cn("flex h-full flex-col overflow-hidden border-border bg-card", direction === "vertical" ? "border-t" : "border-l")}>
+    <div
+      className={cn(
+        "flex h-full flex-col overflow-hidden border-border bg-card",
+        direction === "vertical" ? "border-t" : "border-l",
+      )}
+    >
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="flex items-center gap-2">
           <Terminal className="h-4 w-4 text-primary" />
@@ -179,7 +203,9 @@ export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
             size="sm"
             onClick={() => setNewestFirst((v) => !v)}
             className="h-7 px-2 text-muted-foreground hover:text-foreground"
-            title={newestFirst ? "Newest first (click to reverse)" : "Oldest first (click to reverse)"}
+            title={
+              newestFirst ? "Newest first (click to reverse)" : "Oldest first (click to reverse)"
+            }
           >
             <ArrowDownUp className="h-3.5 w-3.5" />
           </Button>
@@ -216,7 +242,7 @@ export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
                       "rounded-full px-1.5 py-0.5 text-xs font-medium",
                       entry.type === "error" && "bg-destructive/20 text-destructive",
                       entry.type === "success" && "bg-success/20 text-success",
-                      entry.type === "info" && "bg-secondary text-muted-foreground"
+                      entry.type === "info" && "bg-secondary text-muted-foreground",
                     )}
                   >
                     {entry.type}

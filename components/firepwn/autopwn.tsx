@@ -1,17 +1,23 @@
 "use client"
 
+import { AlertTriangle, CheckCircle2, ChevronDown, Crosshair, Loader2 } from "lucide-react"
+import { useCallback, useRef, useState } from "react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useFirebase } from "@/lib/firebase-context"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Crosshair, ChevronDown, Loader2, CheckCircle2, AlertTriangle } from "lucide-react"
-import { useCallback, useRef, useState } from "react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useFirebase } from "@/lib/firebase-context"
 
 const COMMON_COLLECTIONS = [
   // Auth / Users
@@ -210,17 +216,20 @@ export function Autopwn() {
     setExpandedResults(true)
 
     const collections = getCollectionsToScan()
-    const limit = Math.max(1, Math.min(100, parseInt(scanLimit) || 5))
-    const maxConcurrent = Math.max(1, Math.min(50, parseInt(concurrency) || 10))
+    const limit = Math.max(1, Math.min(100, parseInt(scanLimit, 10) || 5))
+    const maxConcurrent = Math.max(1, Math.min(50, parseInt(concurrency, 10) || 10))
     const found: CollectionResult[] = []
 
-    output(`[Autopwn] Starting scan of ${collections.length} collection names (limit=${limit}, concurrency=${maxConcurrent})...`, "info")
+    output(
+      `[Autopwn] Starting scan of ${collections.length} collection names (limit=${limit}, concurrency=${maxConcurrent})...`,
+      "info",
+    )
 
     // Phase 1: Discover collections with read access
     const discoverCollection = async (name: string): Promise<CollectionResult | null> => {
       if (abortRef.current) return null
       try {
-        output(`Trying ${name}`);
+        output(`Trying ${name}`)
         const snapshot = await w.firestoreService.collection(name).limit(limit).get()
         const docCount = snapshot.docs.length
         const sampleDocId = snapshot.docs.length > 0 ? snapshot.docs[0].id : null
@@ -246,7 +255,9 @@ export function Autopwn() {
     for (let i = 0; i < collections.length; i += maxConcurrent) {
       if (abortRef.current) break
       const batch = collections.slice(i, i + maxConcurrent)
-      setStatusText(`Probing collections ${i + 1}-${Math.min(i + maxConcurrent, collections.length)} of ${collections.length}...`)
+      setStatusText(
+        `Probing collections ${i + 1}-${Math.min(i + maxConcurrent, collections.length)} of ${collections.length}...`,
+      )
 
       const batchResults = await Promise.all(batch.map(discoverCollection))
 
@@ -267,7 +278,10 @@ export function Autopwn() {
       return
     }
 
-    output(`[Autopwn] Discovery complete. Found ${found.length} readable collection${found.length !== 1 ? "s" : ""} with data.`, found.length > 0 ? "success" : "info")
+    output(
+      `[Autopwn] Discovery complete. Found ${found.length} readable collection${found.length !== 1 ? "s" : ""} with data.`,
+      found.length > 0 ? "success" : "info",
+    )
 
     // Phase 2: Test write/delete access on discovered collections
     if (testWrites && found.length > 0) {
@@ -282,7 +296,10 @@ export function Autopwn() {
 
         // Test write
         try {
-          await w.firestoreService.collection(r.name).doc(testDocId).set({ _firepwn_probe: true, _ts: Date.now() })
+          await w.firestoreService
+            .collection(r.name)
+            .doc(testDocId)
+            .set({ _firepwn_probe: true, _ts: Date.now() })
           r.writeAccess = "allowed"
         } catch (e: any) {
           r.writeAccess = e.code === "permission-denied" ? "denied" : "unknown"
@@ -297,7 +314,10 @@ export function Autopwn() {
           } catch (e: any) {
             r.deleteAccess = e.code === "permission-denied" ? "denied" : "unknown"
             // Warn: we wrote a doc but couldn't delete it
-            output(`[Autopwn] Warning: wrote probe doc to "${r.name}" but couldn't delete it (doc ID: ${testDocId})`, "error")
+            output(
+              `[Autopwn] Warning: wrote probe doc to "${r.name}" but couldn't delete it (doc ID: ${testDocId})`,
+              "error",
+            )
           }
         } else {
           // Try delete of a fake doc to test delete rules independently
@@ -310,7 +330,9 @@ export function Autopwn() {
         }
 
         // Update the result in state
-        setResults((prev) => prev.map((existing) => (existing.name === r.name ? { ...r } : existing)))
+        setResults((prev) =>
+          prev.map((existing) => (existing.name === r.name ? { ...r } : existing)),
+        )
         setProgress(Math.round(((i + 1) / found.length) * 100))
       }
     }
@@ -374,7 +396,10 @@ export function Autopwn() {
             {COMMON_COLLECTIONS.length} built-in names
           </Badge>
         </div>
-        <p className="text-xs text-muted-foreground">Automatically discover Firestore collections by probing common names and test read/write/delete access.</p>
+        <p className="text-xs text-muted-foreground">
+          Automatically discover Firestore collections by probing common names and test
+          read/write/delete access.
+        </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {/* Configuration */}
@@ -410,7 +435,11 @@ export function Autopwn() {
           </div>
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs text-muted-foreground">Write/Delete test</Label>
-            <Select value={testWrites ? "yes" : "no"} onValueChange={(v) => setTestWrites(v === "yes")} disabled={isRunning}>
+            <Select
+              value={testWrites ? "yes" : "no"}
+              onValueChange={(v) => setTestWrites(v === "yes")}
+              disabled={isRunning}
+            >
               <SelectTrigger className="border-border bg-secondary text-foreground">
                 <SelectValue />
               </SelectTrigger>
@@ -422,7 +451,11 @@ export function Autopwn() {
           </div>
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs text-muted-foreground">Scan mode</Label>
-            <Select value={scanMode} onValueChange={(v) => setScanMode(v as "all" | "custom")} disabled={isRunning}>
+            <Select
+              value={scanMode}
+              onValueChange={(v) => setScanMode(v as "all" | "custom")}
+              disabled={isRunning}
+            >
               <SelectTrigger className="border-border bg-secondary text-foreground">
                 <SelectValue />
               </SelectTrigger>
@@ -452,7 +485,10 @@ export function Autopwn() {
         {/* Action buttons */}
         <div className="flex items-center gap-2">
           {!isRunning ? (
-            <Button onClick={runScan} className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button
+              onClick={runScan}
+              className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
               <Crosshair className="h-3.5 w-3.5" />
               {phase === "done" ? "Re-scan" : "Start Scan"}
             </Button>
@@ -505,7 +541,9 @@ export function Autopwn() {
                     )}
                   </div>
                 </div>
-                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${expandedResults ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${expandedResults ? "rotate-180" : ""}`}
+                />
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-2">
@@ -565,5 +603,11 @@ function PermissionBadge({ label, status }: { label: string; status: PermissionS
     unknown: "bg-zinc-600/20 text-zinc-500 border-zinc-600/30",
   }
 
-  return <span className={`inline-flex h-5 w-7 items-center justify-center rounded border text-[10px] font-bold ${colors[status]}`}>{label}</span>
+  return (
+    <span
+      className={`inline-flex h-5 w-7 items-center justify-center rounded border text-[10px] font-bold ${colors[status]}`}
+    >
+      {label}
+    </span>
+  )
 }
