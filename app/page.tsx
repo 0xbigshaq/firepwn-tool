@@ -1,5 +1,7 @@
 "use client"
 
+import { Cloud, Crosshair, Database, HardDrive } from "lucide-react"
+import { useState } from "react"
 import { AuthPanel } from "@/components/firepwn/auth-panel"
 import { Autopwn } from "@/components/firepwn/autopwn"
 import { CloudFunctions } from "@/components/firepwn/cloud-functions"
@@ -11,8 +13,6 @@ import { StorageExplorer } from "@/components/firepwn/storage-explorer"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FirebaseProvider, useFirebase } from "@/lib/firebase-context"
-import { Cloud, Crosshair, Database, HardDrive } from "lucide-react"
-import { useState } from "react"
 
 function MainContent() {
   const { state } = useFirebase()

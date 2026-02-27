@@ -1,6 +1,7 @@
 "use client"
 
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
+import type React from "react"
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
 
 export interface LogEntry {
   id: string
@@ -240,6 +241,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   }, [output])
 
   // Auto-init from saved config on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount only
   useEffect(() => {
     if (initCalledRef.current) return
     try {
@@ -257,7 +259,6 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     } catch {
       /* noop */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const signIn = useCallback(
@@ -566,7 +567,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                   filterValue.startsWith("{") ||
                   filterValue === "true" ||
                   filterValue === "false" ||
-                  !isNaN(Number(filterValue))
+                  !Number.isNaN(Number(filterValue))
                 ) {
                   parsedFilterValue = JSON.parse(filterValue)
                 } else {
@@ -696,7 +697,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         const currentUser = w.authService?.currentUser
         if (currentUser) {
           const idToken = await currentUser.getIdToken()
-          headers["Authorization"] = `Bearer ${idToken}`
+          headers.Authorization = `Bearer ${idToken}`
         }
       } catch {
         /* proceed without auth */

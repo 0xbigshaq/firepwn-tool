@@ -1,11 +1,11 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { useFirebase } from "@/lib/firebase-context"
-import { cn } from "@/lib/utils"
 import { ArrowDownUp, PanelBottom, PanelRight, Terminal, Trash2 } from "lucide-react"
 import { Highlight, themes } from "prism-react-renderer"
 import { useEffect, useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { useFirebase } from "@/lib/firebase-context"
+import { cn } from "@/lib/utils"
 
 function parseJsonParts(content: string): { text: string; isJson: boolean }[] {
   const parts: { text: string; isJson: boolean }[] = []
@@ -157,6 +157,7 @@ export function OutputLog({ direction, onToggleDirection }: OutputLogProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [newestFirst, setNewestFirst] = useState(true)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on new log entries
   useEffect(() => {
     const el = scrollRef.current
     if (el) {

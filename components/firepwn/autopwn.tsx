@@ -1,9 +1,15 @@
 "use client"
 
+import { AlertTriangle, CheckCircle2, ChevronDown, Crosshair, Loader2 } from "lucide-react"
+import { useCallback, useRef, useState } from "react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Progress } from "@/components/ui/progress"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Select,
   SelectContent,
@@ -12,12 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useFirebase } from "@/lib/firebase-context"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Crosshair, ChevronDown, Loader2, CheckCircle2, AlertTriangle } from "lucide-react"
-import { useCallback, useRef, useState } from "react"
 
 const COMMON_COLLECTIONS = [
   // Auth / Users
@@ -216,8 +216,8 @@ export function Autopwn() {
     setExpandedResults(true)
 
     const collections = getCollectionsToScan()
-    const limit = Math.max(1, Math.min(100, parseInt(scanLimit) || 5))
-    const maxConcurrent = Math.max(1, Math.min(50, parseInt(concurrency) || 10))
+    const limit = Math.max(1, Math.min(100, parseInt(scanLimit, 10) || 5))
+    const maxConcurrent = Math.max(1, Math.min(50, parseInt(concurrency, 10) || 10))
     const found: CollectionResult[] = []
 
     output(

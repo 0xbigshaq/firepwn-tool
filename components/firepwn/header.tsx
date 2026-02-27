@@ -25,6 +25,7 @@ export function Header() {
             height="22"
             viewBox="0 0 24 24"
             role="img"
+            aria-label="GitHub"
             focusable="false"
           >
             <path

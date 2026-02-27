@@ -54,6 +54,10 @@
       "includes": ["components/ui/**"],
       "linter": { "enabled": false },
       "formatter": { "enabled": false }
+    },
+    {
+      "includes": ["hooks/**"],
+      "linter": { "enabled": false }
     }
   ]
 }

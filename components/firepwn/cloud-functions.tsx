@@ -1,7 +1,9 @@
 "use client"
 
-import React from "react"
-
+import { Cloud } from "lucide-react"
+import { Highlight, themes } from "prism-react-renderer"
+import type React from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -14,9 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useFirebase } from "@/lib/firebase-context"
-import { Cloud } from "lucide-react"
-import { Highlight, themes } from "prism-react-renderer"
-import { useMemo, useState } from "react"
 
 type Mode = "callable" | "http"
 type HttpMethod = "GET" | "POST"

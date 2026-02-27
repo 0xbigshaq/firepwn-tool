@@ -1,7 +1,8 @@
 "use client"
 
-import React from "react"
-
+import { Braces, Check, ChevronDown, Flame, TextCursorInput, Trash2 } from "lucide-react"
+import type React from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -9,8 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useFirebase } from "@/lib/firebase-context"
-import { Braces, Check, ChevronDown, Flame, TextCursorInput, Trash2 } from "lucide-react"
-import { useEffect, useState } from "react"
 
 export function InitForm() {
   const { state, initFirebase, clearSavedConfig } = useFirebase()
