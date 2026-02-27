@@ -354,7 +354,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         nextAuthLogMessageRef.current = null
       })
     },
-    [output]
+    [output],
   )
 
   const verifyMfaCode = useCallback(
