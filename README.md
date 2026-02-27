@@ -2,7 +2,6 @@
 
 A tool for testing Firebase Security Rules by simulating real client SDK behavior. Unlike most Firebase pentest scripts that rely on the [REST API](https://firebase.google.com/docs/reference/rest/database), firepwn uses the actual Firebase Client SDK to test both **authentication** and **authorization** across multiple Google services.
 
-
 ## Features
 
 ### Firebase Initialization
@@ -24,7 +23,7 @@ Supports multiple [Firebase Authentication](https://firebase.google.com/products
 ![./screenshots/auth-2-o.png](./screenshots/auth-2-o.png)
 
 - **MFA (SMS)** - complete multi-factor authentication challenges with SMS verification codes
-
+- **Anonymous** - sign in anonymously to test rules that allow unauthenticated or anonymous users
 
 ### Firestore Database
 
@@ -52,16 +51,26 @@ Interact with Firebase Storage buckets:
 
 Invoke [callable Cloud Functions](https://firebase.google.com/docs/functions/) with custom parameters to test authorization on backend logic.
 
+### Autopwn
+
+Automatically discover and test Firestore collections:
+
+- **Collection discovery** - probes 120+ common collection names (users, orders, settings, etc.) to find readable data
+- **Custom collections** - add your own collection names to scan, with an option to scan custom names only
+- **Write/Delete testing** - optionally test write and delete access on discovered collections (disabled by default to avoid accidental damage)
+- **Configurable concurrency** - control scan speed from gentle (5) to aggressive (50) parallel probes
+- **Live results** - real-time progress bar with per-collection R/W/D permission badges
+
 ### Custom Scripting
 
 Firebase services are attached to `window` globals during initialization, so you can run custom queries directly from the browser console:
 
-| Variable                  | Reference                                                                        |
-|---------------------------|----------------------------------------------------------------------------------|
-| `window.authService`      | [Auth](https://firebase.google.com/docs/reference/js/v8/firebase.auth.Auth)          |
+| Variable                  | Reference                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| `window.authService`      | [Auth](https://firebase.google.com/docs/reference/js/v8/firebase.auth.Auth)                |
 | `window.firestoreService` | [Firestore](https://firebase.google.com/docs/reference/js/v8/firebase.firestore.Firestore) |
 | `window.functionsService` | [Functions](https://firebase.google.com/docs/reference/js/v8/firebase.functions.Functions) |
-| `window.storageService`   | [Storage](https://firebase.google.com/docs/reference/js/v8/firebase.storage.Storage)   |
+| `window.storageService`   | [Storage](https://firebase.google.com/docs/reference/js/v8/firebase.storage.Storage)       |
 
 ![./screenshots/scripting-fb.gif](./screenshots/scripting-fb.gif)
 
@@ -84,7 +93,6 @@ npm run dev
 ```
 
 Then open [http://localhost:3000](http://localhost:3000).
-
 
 ## License
 
