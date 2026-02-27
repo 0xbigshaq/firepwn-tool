@@ -28,11 +28,26 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js" strategy="beforeInteractive" />
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js" strategy="beforeInteractive" />
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js" strategy="beforeInteractive" />
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-functions.js" strategy="beforeInteractive" />
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-storage.js" strategy="beforeInteractive" />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-functions.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-storage.js"
+          strategy="beforeInteractive"
+        />
         {children}
       </body>
     </html>

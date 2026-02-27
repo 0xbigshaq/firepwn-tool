@@ -25,7 +25,9 @@ function MainContent() {
         <ResizablePanel defaultSize={70} minSize={30}>
           <main className="h-full overflow-y-auto px-4 py-6">
             <div className="mx-auto w-full max-w-7xl">
-              <p className="mb-6 text-sm italic text-muted-foreground">{"Test your Firebase app's authentication & authorization."}</p>
+              <p className="mb-6 text-sm italic text-muted-foreground">
+                {"Test your Firebase app's authentication & authorization."}
+              </p>
 
               <div className="flex flex-col gap-6">
                 <InitForm />
@@ -74,7 +76,12 @@ function MainContent() {
               </div>
 
               <footer className="border-t border-border mt-6 py-4 text-center text-xs text-muted-foreground">
-                <a href="https://github.com/0xbigshaq/firepwn-tool" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">
+                <a
+                  href="https://github.com/0xbigshaq/firepwn-tool"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-foreground"
+                >
                   firepwn
                 </a>
                 {" - Firebase Security Rules Testing Tool"}
@@ -84,7 +91,12 @@ function MainContent() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30} minSize={10} maxSize={70}>
-          <OutputLog direction={panelDirection} onToggleDirection={() => setPanelDirection((d) => (d === "vertical" ? "horizontal" : "vertical"))} />
+          <OutputLog
+            direction={panelDirection}
+            onToggleDirection={() =>
+              setPanelDirection((d) => (d === "vertical" ? "horizontal" : "vertical"))
+            }
+          />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
