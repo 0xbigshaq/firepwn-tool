@@ -222,6 +222,7 @@ export function Autopwn() {
     const discoverCollection = async (name: string): Promise<CollectionResult | null> => {
       if (abortRef.current) return null
       try {
+        output(`Trying ${name}`);
         const snapshot = await w.firestoreService.collection(name).limit(limit).get()
         const docCount = snapshot.docs.length
         const sampleDocId = snapshot.docs.length > 0 ? snapshot.docs[0].id : null
