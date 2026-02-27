@@ -1,21 +1,18 @@
 "use client"
 
+import { Cloud, Crosshair, Database, HardDrive } from "lucide-react"
+import { useState } from "react"
 import { AuthPanel } from "@/components/firepwn/auth-panel"
+import { Autopwn } from "@/components/firepwn/autopwn"
 import { CloudFunctions } from "@/components/firepwn/cloud-functions"
 import { FirestoreExplorer } from "@/components/firepwn/firestore-explorer"
 import { Header } from "@/components/firepwn/header"
 import { InitForm } from "@/components/firepwn/init-form"
 import { OutputLog } from "@/components/firepwn/output-log"
 import { StorageExplorer } from "@/components/firepwn/storage-explorer"
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FirebaseProvider, useFirebase } from "@/lib/firebase-context"
-import { Cloud, Database, HardDrive } from "lucide-react"
-import { useState } from "react"
 
 function MainContent() {
   const { state } = useFirebase()
@@ -51,6 +48,10 @@ function MainContent() {
                           <Cloud className="h-3.5 w-3.5" />
                           Cloud Functions
                         </TabsTrigger>
+                        <TabsTrigger value="autopwn" className="gap-1.5">
+                          <Crosshair className="h-3.5 w-3.5" />
+                          Autopwn
+                        </TabsTrigger>
                       </TabsList>
                       <TabsContent value="firestore">
                         <FirestoreExplorer />
@@ -60,6 +61,9 @@ function MainContent() {
                       </TabsContent>
                       <TabsContent value="functions">
                         <CloudFunctions />
+                      </TabsContent>
+                      <TabsContent value="autopwn">
+                        <Autopwn />
                       </TabsContent>
                     </Tabs>
                     <div>

@@ -1,0 +1,27 @@
+name: Lint & Format
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev, master]
+
+jobs:
+  lint:
+    name: Biome Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Check formatting
+        run: npx biome format .
+
+      - name: Lint
+        run: npm run lint

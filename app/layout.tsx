@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import Script from "next/script"
-import React from "react"
+import type React from "react"
 
 import "./globals.css"
 
@@ -28,11 +28,26 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js" strategy="beforeInteractive" />
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js" strategy="beforeInteractive" />
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js" strategy="beforeInteractive" />
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-functions.js" strategy="beforeInteractive" />
-        <Script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-storage.js" strategy="beforeInteractive" />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-functions.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://www.gstatic.com/firebasejs/7.15.5/firebase-storage.js"
+          strategy="beforeInteractive"
+        />
         {children}
       </body>
     </html>

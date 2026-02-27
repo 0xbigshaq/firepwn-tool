@@ -1,16 +1,21 @@
 "use client"
 
-import React from "react"
-
+import { Cloud } from "lucide-react"
+import { Highlight, themes } from "prism-react-renderer"
+import type React from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useFirebase } from "@/lib/firebase-context"
-import { Cloud } from "lucide-react"
-import { Highlight, themes } from "prism-react-renderer"
-import { useMemo, useState } from "react"
 
 type Mode = "callable" | "http"
 type HttpMethod = "GET" | "POST"
@@ -144,7 +149,9 @@ export function CloudFunctions() {
             type="button"
             onClick={() => setMode("callable")}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              mode === "callable" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
+              mode === "callable"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
             Callable (on_call)
@@ -153,7 +160,9 @@ export function CloudFunctions() {
             type="button"
             onClick={() => setMode("http")}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              mode === "http" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
+              mode === "http"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
             HTTP (on_request)
@@ -174,7 +183,9 @@ export function CloudFunctions() {
                 onChange={(e) => setCmd(e.target.value)}
                 className="border-border bg-secondary font-mono text-sm text-foreground"
               />
-              <p className="text-xs text-muted-foreground">{'Format: functionName({ "param1": "value", "param2": true })'}</p>
+              <p className="text-xs text-muted-foreground">
+                {'Format: functionName({ "param1": "value", "param2": true })'}
+              </p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -226,7 +237,10 @@ export function CloudFunctions() {
               <Label className="text-xs text-muted-foreground">Call preview</Label>
               <Highlight theme={themes.vsDark} code={callPreview} language="javascript">
                 {({ style, tokens, getLineProps, getTokenProps }) => (
-                  <pre style={style} className="overflow-auto rounded-md border border-border px-3 py-2 text-xs">
+                  <pre
+                    style={style}
+                    className="overflow-auto rounded-md border border-border px-3 py-2 text-xs"
+                  >
                     {tokens.map((line, i) => (
                       <div key={i} {...getLineProps({ line })}>
                         {line.map((token, key) => (
@@ -240,7 +254,10 @@ export function CloudFunctions() {
             </div>
           )}
           <div>
-            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button
+              type="submit"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
               {mode === "callable" ? "Invoke" : `Send ${httpMethod}`}
             </Button>
           </div>

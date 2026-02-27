@@ -1,13 +1,13 @@
 "use client"
 
+import { Copy, KeyRound, LogOut, ShieldCheck, UserX } from "lucide-react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFirebase } from "@/lib/firebase-context"
-import { Copy, KeyRound, LogOut, ShieldCheck } from "lucide-react"
-import { useState } from "react"
 
 function MfaDialog() {
   const { verifyMfaCode, cancelMfa } = useFirebase()
@@ -37,11 +37,7 @@ function MfaDialog() {
         >
           Verify
         </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={cancelMfa}
-        >
+        <Button size="sm" variant="destructive" onClick={cancelMfa}>
           Cancel
         </Button>
       </div>
@@ -52,7 +48,16 @@ function MfaDialog() {
 }
 
 export function AuthPanel() {
-  const { state, signIn, signUp, signOut, googleOAuth, customTokenSignIn, showMfaDialog } = useFirebase()
+  const {
+    state,
+    signIn,
+    signUp,
+    signInAnonymously,
+    signOut,
+    googleOAuth,
+    customTokenSignIn,
+    showMfaDialog,
+  } = useFirebase()
   const [loginEmail, setLoginEmail] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
   const [signupEmail, setSignupEmail] = useState("")
@@ -62,7 +67,7 @@ export function AuthPanel() {
 
   const handleCopyUid = () => {
     if (!state.authUser?.uid) return
-    navigator.clipboard.writeText(state.authUser.uid).catch(() => { })
+    navigator.clipboard.writeText(state.authUser.uid).catch(() => {})
   }
 
   if (!state.initialized) return null
@@ -81,7 +86,9 @@ export function AuthPanel() {
             <div className="rounded-md border border-border bg-secondary p-3">
               <p className="text-sm text-foreground">
                 Logged in as{" "}
-                <span className="font-medium text-primary">{state.authUser.email || "(no email)"}</span>
+                <span className="font-medium text-primary">
+                  {state.authUser.email || "(no email)"}
+                </span>
               </p>
               <div className="mt-1.5 flex items-center gap-1.5">
                 <span className="text-xs text-muted-foreground">UID:</span>
@@ -111,17 +118,35 @@ export function AuthPanel() {
         ) : (
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="mb-3 w-full bg-secondary">
-              <TabsTrigger value="login" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger
+                value="login"
+                className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
                 Login
               </TabsTrigger>
-              <TabsTrigger value="register" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger
+                value="register"
+                className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
                 Register
               </TabsTrigger>
-              <TabsTrigger value="oauth" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger
+                value="oauth"
+                className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
                 OAuth
               </TabsTrigger>
-              <TabsTrigger value="custom-token" className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger
+                value="custom-token"
+                className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
                 Custom
+              </TabsTrigger>
+              <TabsTrigger
+                value="anon"
+                className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Anon
               </TabsTrigger>
             </TabsList>
             <TabsContent value="login">
@@ -133,7 +158,9 @@ export function AuthPanel() {
                 className="flex flex-col gap-3"
               >
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="login-email" className="text-xs text-muted-foreground">Email</Label>
+                  <Label htmlFor="login-email" className="text-xs text-muted-foreground">
+                    Email
+                  </Label>
                   <Input
                     id="login-email"
                     type="text"
@@ -145,7 +172,9 @@ export function AuthPanel() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="login-pw" className="text-xs text-muted-foreground">Password</Label>
+                  <Label htmlFor="login-pw" className="text-xs text-muted-foreground">
+                    Password
+                  </Label>
                   <Input
                     id="login-pw"
                     type="password"
@@ -156,7 +185,11 @@ export function AuthPanel() {
                     className="border-border bg-secondary text-foreground"
                   />
                 </div>
-                <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
                   Login
                 </Button>
               </form>
@@ -170,7 +203,9 @@ export function AuthPanel() {
                 className="flex flex-col gap-3"
               >
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="signup-email" className="text-xs text-muted-foreground">Email</Label>
+                  <Label htmlFor="signup-email" className="text-xs text-muted-foreground">
+                    Email
+                  </Label>
                   <Input
                     id="signup-email"
                     type="text"
@@ -182,7 +217,9 @@ export function AuthPanel() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="signup-pw" className="text-xs text-muted-foreground">Password</Label>
+                  <Label htmlFor="signup-pw" className="text-xs text-muted-foreground">
+                    Password
+                  </Label>
                   <Input
                     id="signup-pw"
                     type="password"
@@ -193,7 +230,11 @@ export function AuthPanel() {
                     className="border-border bg-secondary text-foreground"
                   />
                 </div>
-                <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
                   Sign up
                 </Button>
               </form>
@@ -224,7 +265,11 @@ export function AuthPanel() {
                     className="border-border bg-secondary font-mono text-xs text-foreground"
                   />
                 </div>
-                <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
                   Authenticate
                 </Button>
               </form>
@@ -255,10 +300,29 @@ export function AuthPanel() {
                     className="border-border bg-secondary font-mono text-xs text-foreground"
                   />
                 </div>
-                <Button type="submit" size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
                   Sign in
                 </Button>
               </form>
+            </TabsContent>
+            <TabsContent value="anon">
+              <div className="flex flex-col gap-3">
+                <p className="text-xs text-muted-foreground">
+                  Sign in anonymously to test rules that allow unauthenticated or anonymous users.
+                </p>
+                <Button
+                  size="sm"
+                  onClick={signInAnonymously}
+                  className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  <UserX className="h-3.5 w-3.5" />
+                  Sign in Anonymously
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
         )}
