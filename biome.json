@@ -47,7 +47,7 @@
     }
   },
   "files": {
-    "includes": ["**", "!!.next", "!!dist", "!!build", "!public"]
+    "includes": ["**", "!!.next", "!!dist", "!!build", "!public", "!next-env.d.ts"]
   },
   "overrides": [
     {
