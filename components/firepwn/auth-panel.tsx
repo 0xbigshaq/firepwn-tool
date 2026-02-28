@@ -48,13 +48,22 @@ function MfaDialog() {
 }
 
 export function AuthPanel() {
-  const { state, signIn, signUp, signInAnonymously, signOut, googleOAuth, showMfaDialog } =
-    useFirebase()
+  const {
+    state,
+    signIn,
+    signUp,
+    signInAnonymously,
+    signOut,
+    googleOAuth,
+    customTokenSignIn,
+    showMfaDialog,
+  } = useFirebase()
   const [loginEmail, setLoginEmail] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
   const [signupEmail, setSignupEmail] = useState("")
   const [signupPassword, setSignupPassword] = useState("")
   const [oauthToken, setOauthToken] = useState("")
+  const [customToken, setCustomToken] = useState("")
 
   const handleCopyUid = () => {
     if (!state.authUser?.uid) return
@@ -108,7 +117,7 @@ export function AuthPanel() {
           <MfaDialog />
         ) : (
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="mb-3 w-full bg-secondary">
+            <TabsList className="mb-3 h-auto w-full flex-wrap bg-secondary">
               <TabsTrigger
                 value="login"
                 className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -126,6 +135,12 @@ export function AuthPanel() {
                 className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 OAuth
+              </TabsTrigger>
+              <TabsTrigger
+                value="custom-token"
+                className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Custom
               </TabsTrigger>
               <TabsTrigger
                 value="anon"
@@ -256,6 +271,41 @@ export function AuthPanel() {
                   className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   Authenticate
+                </Button>
+              </form>
+            </TabsContent>
+            <TabsContent value="custom-token">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  customTokenSignIn(customToken)
+                  setCustomToken("")
+                }}
+                className="flex flex-col gap-3"
+              >
+                <p className="text-xs text-muted-foreground">
+                  Paste a Firebase custom token minted by your backend (not the ID token).
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="custom-token" className="text-xs text-muted-foreground">
+                    customToken
+                  </Label>
+                  <Input
+                    id="custom-token"
+                    type="text"
+                    placeholder="eyJhbGciOi..."
+                    required
+                    value={customToken}
+                    onChange={(e) => setCustomToken(e.target.value)}
+                    className="border-border bg-secondary font-mono text-xs text-foreground"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  Sign in
                 </Button>
               </form>
             </TabsContent>

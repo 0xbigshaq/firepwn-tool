@@ -32,6 +32,7 @@ interface FirebaseContextType {
   signInAnonymously: () => void
   signOut: () => void
   googleOAuth: (idToken: string) => void
+  customTokenSignIn: (token: string) => void
   showMfaDialog: boolean
   setShowMfaDialog: (show: boolean) => void
   verifyMfaCode: (code: string) => void
@@ -333,6 +334,25 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       } catch (e: any) {
         output(`Error: ${e.message}`, "error")
       }
+    },
+    [output],
+  )
+
+  const customTokenSignIn = useCallback(
+    (token: string) => {
+      const w = window as any
+      if (!w.authService) return
+      const trimmedToken = token.trim()
+      if (!trimmedToken) {
+        output("Error: Custom token is required", "error")
+        return
+      }
+
+      nextAuthLogMessageRef.current = "Logged in via custom token"
+      w.authService.signInWithCustomToken(trimmedToken).catch((e: any) => {
+        output(`Error: Custom token sign-in failed - ${e.message}`, "error")
+        nextAuthLogMessageRef.current = null
+      })
     },
     [output],
   )
@@ -888,6 +908,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         signInAnonymously,
         signOut: signOutFn,
         googleOAuth,
+        customTokenSignIn,
         showMfaDialog,
         setShowMfaDialog,
         verifyMfaCode,
