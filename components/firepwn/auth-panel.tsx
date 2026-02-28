@@ -117,7 +117,7 @@ export function AuthPanel() {
           <MfaDialog />
         ) : (
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="mb-3 w-full bg-secondary">
+            <TabsList className="mb-3 h-auto w-full flex-wrap bg-secondary">
               <TabsTrigger
                 value="login"
                 className="flex-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
