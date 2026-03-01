@@ -116,7 +116,7 @@ public/           # Static assets
 
 ## Pull Request Guidelines
 
-1. Fork the repo and create your branch from `master`
+1. Fork the repo and create your branch from `main`
 2. Make sure `npm run lint` passes with no errors
 3. Keep PRs focused - one feature or fix per PR
 4. Write clear commit messages describing what changed and why
