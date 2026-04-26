@@ -163,6 +163,11 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       }
 
       w.firestoreService = firebase.firestore()
+      try {
+        w.firestoreService.settings({ experimentalForceLongPolling: true })
+      } catch (e) {
+        // Ignore settings error if they are already set
+      }
       w.authService = firebase.auth()
       w.functionsService = firebase.app().functions(effectiveRegion)
 
